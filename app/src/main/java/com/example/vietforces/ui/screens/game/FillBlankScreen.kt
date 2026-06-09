@@ -22,15 +22,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.vietforces.data.manager.AiManager
 import com.example.vietforces.data.manager.EncounteredItemsManager
 import com.example.vietforces.data.manager.GameMode
 import com.example.vietforces.data.manager.UserProgressManager
+import com.example.vietforces.data.model.AiCallResult
 import com.example.vietforces.data.model.DifficultyMode
 import com.example.vietforces.data.model.SentenceItem
 import com.example.vietforces.data.repository.VocabularyRepository
 import com.example.vietforces.ui.components.MascotFeedbackManager
 import com.example.vietforces.ui.theme.*
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 /**
@@ -47,7 +50,9 @@ data class FillBlankGameState(
     val totalQuestions: Int = 10,
     val eloChange: Int = 0,
     val showResult: Boolean = false,
-    val correctAnswer: String = "" // Lưu đáp án đúng để tránh flicker khi chuyển câu
+    val correctAnswer: String = "", // Keep the correct answer to avoid flicker during transition
+    val isGrading: Boolean = false, // AI is grading an open answer (hard mode)
+    val aiNote: String? = null // Short AI note when a near-correct answer is accepted
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,6 +63,7 @@ fun FillBlankScreen(
     var difficultyMode by remember { mutableStateOf<DifficultyMode?>(null) }
     var gameState by remember { mutableStateOf(FillBlankGameState()) }
     var showGameOver by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     // Show difficulty selection first
     if (difficultyMode == null) {
@@ -86,36 +92,63 @@ fun FillBlankScreen(
             onBackClick = onBackClick,
             onAnswerSelected = { answer ->
                 val correctAnswer = gameState.currentSentence?.blankWord ?: ""
-                val isCorrect = answer.equals(correctAnswer, ignoreCase = true)
-                val eloChange = if (isCorrect) {
-                    UserProgressManager.recordCorrectAnswer(gameState.currentSentence?.difficulty ?: 1)
-                } else {
-                    UserProgressManager.recordWrongAnswer(gameState.currentSentence?.difficulty ?: 1)
-                }
+                val sentenceText = gameState.currentSentence?.fullSentence ?: ""
+                val difficulty = gameState.currentSentence?.difficulty ?: 1
+                val sentenceId = gameState.currentSentence?.id
+                val exact = answer.trim().equals(correctAnswer, ignoreCase = true)
 
-                // Record encounter for spaced repetition
-                gameState.currentSentence?.let { sentence ->
-                    EncounteredItemsManager.recordEncounter(
-                        gameMode = GameMode.FILL_BLANK,
-                        itemId = sentence.id,
-                        wasCorrect = isCorrect
+                fun applyResult(isCorrect: Boolean, aiNote: String?) {
+                    val eloChange = if (isCorrect) {
+                        UserProgressManager.recordCorrectAnswer(difficulty)
+                    } else {
+                        UserProgressManager.recordWrongAnswer(difficulty)
+                    }
+
+                    sentenceId?.let {
+                        EncounteredItemsManager.recordEncounter(GameMode.FILL_BLANK, it, isCorrect)
+                    }
+
+                    if (isCorrect) {
+                        MascotFeedbackManager.showCorrectFeedback(
+                            "Bài điền từ. Câu: \"$sentenceText\". Từ đúng: \"$correctAnswer\", người học nhập: \"$answer\"."
+                        )
+                    } else {
+                        MascotFeedbackManager.showWrongFeedback(
+                            "Bài điền từ. Câu: \"$sentenceText\". Từ đúng: \"$correctAnswer\", người học chọn: \"$answer\"."
+                        )
+                    }
+
+                    gameState = gameState.copy(
+                        selectedAnswer = answer,
+                        isCorrect = isCorrect,
+                        score = if (isCorrect) gameState.score + 1 else gameState.score,
+                        eloChange = gameState.eloChange + eloChange,
+                        showResult = true,
+                        correctAnswer = correctAnswer,
+                        isGrading = false,
+                        aiNote = aiNote
                     )
                 }
 
-                // Show mascot feedback
-                if (isCorrect) {
-                    MascotFeedbackManager.showCorrectFeedback()
+                // Exact match, easy (multiple choice) or AI off → grade locally (§10.1).
+                if (exact || difficultyMode != DifficultyMode.HARD || !AiManager.isAvailable()) {
+                    applyResult(exact, null)
                 } else {
-                    MascotFeedbackManager.showWrongFeedback()
+                    // Hard mode + typed answer differs from key → AI checks meaning (§6.1/6.3).
+                    gameState = gameState.copy(isGrading = true)
+                    scope.launch {
+                        when (val r = AiManager.gradeOpenAnswer(
+                            question = sentenceText.ifBlank { "Điền từ còn thiếu" },
+                            expectedAnswer = correctAnswer,
+                            userAnswer = answer
+                        )) {
+                            is AiCallResult.Success ->
+                                applyResult(r.data.isAcceptable, r.data.feedback.ifBlank { null })
+                            is AiCallResult.Error ->
+                                applyResult(false, null)
+                        }
+                    }
                 }
-
-                gameState = gameState.copy(
-                    selectedAnswer = answer,
-                    isCorrect = isCorrect,
-                    score = if (isCorrect) gameState.score + 1 else gameState.score,
-                    eloChange = gameState.eloChange + eloChange,
-                    showResult = true
-                )
             },
             onNextQuestion = {
                 if (gameState.questionNumber >= gameState.totalQuestions) {
@@ -292,29 +325,29 @@ private fun FillBlankGameContent(
     onNextQuestion: () -> Unit,
     onUserInputChange: (String) -> Unit
 ) {
-    // State để kiểm soát hiển thị result
+    // State to control showing the result
     var showResultFeedback by remember { mutableStateOf(false) }
     var resultIsCorrect by remember { mutableStateOf(false) }
     var resultCorrectAnswer by remember { mutableStateOf("") }
 
-    // Khi có kết quả mới, hiển thị feedback
+    // When a new result arrives, show feedback
     LaunchedEffect(gameState.showResult) {
         if (gameState.showResult && gameState.isCorrect != null) {
-            // Lưu kết quả và hiển thị feedback
+            // Store the result and show feedback
             resultIsCorrect = gameState.isCorrect
             resultCorrectAnswer = gameState.correctAnswer
             showResultFeedback = true
 
-            // Chờ 1.5s
+            // Wait 1.5s
             delay(1500)
 
-            // Tắt feedback trước
+            // Hide feedback first
             showResultFeedback = false
 
-            // Chờ animation tắt hoàn toàn (300ms cho fadeOut)
+            // Wait for the exit animation to finish (300ms fadeOut)
             delay(300)
 
-            // Sau đó mới load câu hỏi mới
+            // Then load the next question
             onNextQuestion()
         }
     }
@@ -536,17 +569,26 @@ private fun FillBlankGameContent(
                 Button(
                     onClick = { onAnswerSelected(gameState.userInput) },
                     modifier = Modifier.fillMaxWidth(),
-                    enabled = gameState.userInput.isNotBlank() && !showResultFeedback && !gameState.showResult,
+                    enabled = gameState.userInput.isNotBlank() && !showResultFeedback &&
+                        !gameState.showResult && !gameState.isGrading,
                     colors = ButtonDefaults.buttonColors(containerColor = GameModeFillBlank),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = "Check",
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Kiểm tra", fontSize = 16.sp)
+                    if (gameState.isGrading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(18.dp), color = Color.White, strokeWidth = 2.dp
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("AI đang chấm...", fontSize = 16.sp)
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = "Check",
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Kiểm tra", fontSize = 16.sp)
+                    }
                 }
             }
 
@@ -565,12 +607,11 @@ private fun FillBlankGameContent(
                         containerColor = if (resultIsCorrect) PrimaryGreen.copy(alpha = 0.1f) else VietRed.copy(alpha = 0.1f)
                     )
                 ) {
-                    Row(
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
                             text = if (resultIsCorrect) "🎉 Chính xác!" else "❌ Sai rồi! Đáp án: $resultCorrectAnswer",
@@ -578,6 +619,16 @@ private fun FillBlankGameContent(
                             fontWeight = FontWeight.Medium,
                             color = if (resultIsCorrect) PrimaryGreen else VietRed
                         )
+                        // AI note when a near-correct answer was accepted (§6.3)
+                        gameState.aiNote?.let { note ->
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = "🤖 $note",
+                                fontSize = 13.sp,
+                                color = TextSecondary,
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
                 }
             }

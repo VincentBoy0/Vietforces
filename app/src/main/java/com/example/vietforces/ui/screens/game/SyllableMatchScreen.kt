@@ -64,16 +64,16 @@ data class SyllableMatchGameState(
     val isGameOver: Boolean = false,
     val showMismatch: Boolean = false,
     val message: String? = null,
-    val showingCompletion: Boolean = false  // Đang hiển thị completion trước khi game over
+    val showingCompletion: Boolean = false  // Showing completion before game over
 )
 
 /**
  * Predefined syllable pairs for the game
- * Với cụm 2 âm tiết: ghép 2 mảnh (con + mèo, xe + máy…)
- * Với cụm 3–4 âm tiết: ghép theo "cụm nghĩa" (quán + cà phê, xe + buýt, áo + sơ mi)
+ * For 2-syllable phrases: join 2 pieces (con + mèo, xe + máy…)
+ * For 3–4 syllable phrases: group by meaning (quán + cà phê, xe + buýt, áo + sơ mi)
  */
 private val syllablePairs = listOf(
-    // ==================== ĐỘNG VẬT (20 từ) ====================
+    // ==================== ANIMALS (20 words) ====================
     SyllablePair("con", "mèo", "con mèo"),
     SyllablePair("con", "chó", "con chó"),
     SyllablePair("con", "gà", "con gà"),
@@ -95,7 +95,7 @@ private val syllablePairs = listOf(
     SyllablePair("con", "sóc", "con sóc"),
     SyllablePair("con", "khỉ", "con khỉ"),
 
-    // ==================== ĐỒ DÙNG HỌC TẬP (12 từ) ====================
+    // ==================== SCHOOL SUPPLIES (12 words) ====================
     SyllablePair("cây", "bút", "cây bút"),
     SyllablePair("bút", "chì", "bút chì"),
     SyllablePair("cục", "tẩy", "cục tẩy"),
@@ -109,7 +109,7 @@ private val syllablePairs = listOf(
     SyllablePair("bảng", "đen", "bảng đen"),
     SyllablePair("hộp", "bút", "hộp bút"),
 
-    // ==================== ĐỒ GIA DỤNG (13 từ) ====================
+    // ==================== HOUSEHOLD ITEMS (13 words) ====================
     SyllablePair("cái", "bàn", "cái bàn"),
     SyllablePair("cái", "ghế", "cái ghế"),
     SyllablePair("cái", "giường", "cái giường"),
@@ -124,7 +124,7 @@ private val syllablePairs = listOf(
     SyllablePair("cái", "khóa", "cái khóa"),
     SyllablePair("chìa", "khóa", "chìa khóa"),
 
-    // ==================== ĐỒ BẾP (12 từ) ====================
+    // ==================== KITCHEN (12 words) ====================
     SyllablePair("cái", "nồi", "cái nồi"),
     SyllablePair("cái", "chảo", "cái chảo"),
     SyllablePair("con", "dao", "con dao"),
@@ -138,7 +138,7 @@ private val syllablePairs = listOf(
     SyllablePair("cái", "chén", "cái chén"),
     SyllablePair("cái", "ấm", "cái ấm"),
 
-    // ==================== THỰC PHẨM & ĐỒ UỐNG (20 từ) ====================
+    // ==================== FOOD & DRINKS (20 words) ====================
     SyllablePair("bánh", "mì", "bánh mì"),
     SyllablePair("phở", "bò", "phở bò"),
     SyllablePair("bún", "bò", "bún bò"),
@@ -160,7 +160,7 @@ private val syllablePairs = listOf(
     SyllablePair("nước", "cam", "nước cam"),
     SyllablePair("nước", "mía", "nước mía"),
 
-    // ==================== ĐỊA ĐIỂM (15 từ) ====================
+    // ==================== PLACES (15 words) ====================
     SyllablePair("ngôi", "nhà", "ngôi nhà"),
     SyllablePair("trường", "học", "trường học"),
     SyllablePair("lớp", "học", "lớp học"),
@@ -177,7 +177,7 @@ private val syllablePairs = listOf(
     SyllablePair("bưu", "điện", "bưu điện"),
     SyllablePair("tiệm", "thuốc", "tiệm thuốc"),
 
-    // ==================== PHƯƠNG TIỆN (6 từ) ====================
+    // ==================== VEHICLES (6 words) ====================
     SyllablePair("xe", "máy", "xe máy"),
     SyllablePair("xe", "đạp", "xe đạp"),
     SyllablePair("ô", "tô", "ô tô"),
@@ -185,7 +185,7 @@ private val syllablePairs = listOf(
     SyllablePair("tàu", "hỏa", "tàu hỏa"),
     SyllablePair("máy", "bay", "máy bay"),
 
-    // ==================== CƠ THỂ & TRANG PHỤC (11 từ) ====================
+    // ==================== BODY & CLOTHING (11 words) ====================
     SyllablePair("mái", "tóc", "mái tóc"),
     SyllablePair("đôi", "mắt", "đôi mắt"),
     SyllablePair("cái", "mũ", "cái mũ"),
@@ -217,7 +217,7 @@ fun SyllableMatchScreen(
     // Handle completion delay (5 seconds before showing result)
     LaunchedEffect(gameState.showingCompletion) {
         if (gameState.showingCompletion) {
-            delay(5000)  // 5 giây delay
+            delay(5000)  // 5 second delay
             gameState = gameState.copy(
                 showingCompletion = false,
                 isGameOver = true
@@ -761,7 +761,9 @@ private fun handleCardClick(
         if (firstCard.pairId == flippedCard.pairId && firstCard.id != flippedCard.id) {
             // Match found! Must be classifier + noun pair
             if (firstCard.isClassifier != flippedCard.isClassifier) {
-                MascotFeedbackManager.showCorrectFeedback()
+                MascotFeedbackManager.showCorrectFeedback(
+                    "Bài ghép loại từ. Người học ghép đúng \"${firstCard.text}\" với \"${flippedCard.text}\"."
+                )
                 val eloChange = UserProgressManager.recordCorrectAnswer(1)
                 val matchedPairs = gameState.matchedPairs + 1
 
@@ -797,7 +799,9 @@ private fun handleCardClick(
                 )
             } else {
                 // Same type cards - not a valid match
-                MascotFeedbackManager.showWrongFeedback()
+                MascotFeedbackManager.showWrongFeedback(
+                    "Bài ghép loại từ. Người học ghép hai thẻ cùng loại; cần ghép loại từ (con/cái/quyển...) với danh từ."
+                )
                 gameState.copy(
                     cards = updatedCards,
                     selectedCard = null,
@@ -808,7 +812,9 @@ private fun handleCardClick(
             }
         } else {
             // No match
-            MascotFeedbackManager.showWrongFeedback()
+            MascotFeedbackManager.showWrongFeedback(
+                "Bài ghép loại từ. Hai thẻ không thuộc cùng một cặp."
+            )
             gameState.copy(
                 cards = updatedCards,
                 selectedCard = null,

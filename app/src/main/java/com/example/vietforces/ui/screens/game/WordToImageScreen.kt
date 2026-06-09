@@ -45,7 +45,7 @@ data class WordToImageGameState(
     val totalQuestions: Int = 10,
     val eloChange: Int = 0,
     val showResult: Boolean = false,
-    val correctWordId: String = "" // Lưu ID đáp án đúng để tránh leak khi chuyển câu
+    val correctWordId: String = "" // Keep the correct answer ID to avoid leaking it during transition
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -89,11 +89,16 @@ fun WordToImageScreen(
                     )
                 }
 
-                // Show mascot feedback
+                // Show mascot feedback (with context so AI can react specifically)
+                val targetWord = gameState.currentWord?.word ?: ""
                 if (isCorrect) {
-                    MascotFeedbackManager.showCorrectFeedback()
+                    MascotFeedbackManager.showCorrectFeedback(
+                        "Bài nhìn từ đoán hình. Người học chọn đúng hình cho từ \"$targetWord\"."
+                    )
                 } else {
-                    MascotFeedbackManager.showWrongFeedback()
+                    MascotFeedbackManager.showWrongFeedback(
+                        "Bài nhìn từ đoán hình. Từ cần tìm hình là \"$targetWord\" nhưng người học chọn sai hình."
+                    )
                 }
 
                 gameState = gameState.copy(
@@ -131,29 +136,29 @@ private fun WordToImageGameContent(
     onImageSelected: (VocabularyItem) -> Unit,
     onNextQuestion: () -> Unit
 ) {
-    // State để kiểm soát hiển thị result
+    // State to control showing the result
     var showResultFeedback by remember { mutableStateOf(false) }
     var resultIsCorrect by remember { mutableStateOf(false) }
     var resultCorrectWordId by remember { mutableStateOf("") }
 
-    // Khi có kết quả mới, hiển thị feedback
+    // When a new result arrives, show feedback
     LaunchedEffect(gameState.showResult) {
         if (gameState.showResult && gameState.isCorrect != null) {
-            // Lưu kết quả và hiển thị feedback
+            // Store the result and show feedback
             resultIsCorrect = gameState.isCorrect
             resultCorrectWordId = gameState.correctWordId
             showResultFeedback = true
 
-            // Chờ 1.5s
+            // Wait 1.5s
             delay(1500)
 
-            // Tắt feedback trước
+            // Hide feedback first
             showResultFeedback = false
 
-            // Chờ animation tắt hoàn toàn (300ms cho fadeOut)
+            // Wait for the exit animation to finish (300ms fadeOut)
             delay(300)
 
-            // Sau đó mới load câu hỏi mới
+            // Then load the next question
             onNextQuestion()
         }
     }
@@ -459,7 +464,7 @@ private fun nextWordToImageQuestion(currentState: WordToImageGameState): WordToI
         isCorrect = null,
         questionNumber = currentState.questionNumber + 1,
         showResult = false,
-        correctWordId = nextWord?.id ?: "" // Set correctWordId ngay khi tạo câu mới
+        correctWordId = nextWord?.id ?: "" // Set correctWordId as soon as a new question is created
     )
 }
 

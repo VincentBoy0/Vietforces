@@ -22,15 +22,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.vietforces.data.manager.AiManager
 import com.example.vietforces.data.manager.EncounteredItemsManager
 import com.example.vietforces.data.manager.GameMode
 import com.example.vietforces.data.manager.UserProgressManager
+import com.example.vietforces.data.model.AiCallResult
 import com.example.vietforces.data.model.DifficultyMode
 import com.example.vietforces.data.model.VocabularyItem
 import com.example.vietforces.data.repository.VocabularyRepository
 import com.example.vietforces.ui.components.MascotFeedbackManager
 import com.example.vietforces.ui.theme.*
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 /**
  * Game state for Image to Word game
@@ -46,8 +49,10 @@ data class ImageToWordGameState(
     val eloChange: Int = 0,
     val showResult: Boolean = false,
     val userInput: String = "", // For hard mode
-    val correctAnswer: String = "", // Lưu đáp án đúng để tránh leak khi chuyển câu
-    val isTransitioning: Boolean = false // Đang trong quá trình chuyển câu
+    val correctAnswer: String = "", // Keep the correct answer to avoid leaking it during transition
+    val isTransitioning: Boolean = false, // Transitioning to the next question
+    val isGrading: Boolean = false, // AI is grading an open answer (hard mode)
+    val aiNote: String? = null // Short AI note when a near-correct answer is accepted
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,6 +63,7 @@ fun ImageToWordScreen(
     var difficultyMode by remember { mutableStateOf<DifficultyMode?>(null) }
     var gameState by remember { mutableStateOf(ImageToWordGameState()) }
     var showGameOver by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     // Show difficulty selection first
     if (difficultyMode == null) {
@@ -87,37 +93,64 @@ fun ImageToWordScreen(
             onBackClick = onBackClick,
             onAnswerSelected = { answer ->
                 val correctWord = gameState.currentWord?.word ?: ""
-                val isCorrect = answer.equals(correctWord, ignoreCase = true)
-                val eloChange = if (isCorrect) {
-                    UserProgressManager.recordCorrectAnswer(gameState.currentWord?.difficulty ?: 1)
-                } else {
-                    UserProgressManager.recordWrongAnswer(gameState.currentWord?.difficulty ?: 1)
-                }
+                val difficulty = gameState.currentWord?.difficulty ?: 1
+                val wordId = gameState.currentWord?.id
+                val exact = answer.trim().equals(correctWord, ignoreCase = true)
 
-                // Record encounter for spaced repetition
-                gameState.currentWord?.let { word ->
-                    EncounteredItemsManager.recordEncounter(
-                        gameMode = GameMode.IMAGE_TO_WORD,
-                        itemId = word.id,
-                        wasCorrect = isCorrect
+                // Apply a final verdict (used directly for exact/easy, or after AI grading).
+                fun applyResult(isCorrect: Boolean, aiNote: String?) {
+                    val eloChange = if (isCorrect) {
+                        UserProgressManager.recordCorrectAnswer(difficulty)
+                    } else {
+                        UserProgressManager.recordWrongAnswer(difficulty)
+                    }
+
+                    wordId?.let {
+                        EncounteredItemsManager.recordEncounter(GameMode.IMAGE_TO_WORD, it, isCorrect)
+                    }
+
+                    if (isCorrect) {
+                        MascotFeedbackManager.showCorrectFeedback(
+                            "Bài nhìn hình đoán từ. Từ đúng: \"$correctWord\", người học nhập: \"$answer\"."
+                        )
+                    } else {
+                        MascotFeedbackManager.showWrongFeedback(
+                            "Bài nhìn hình đoán từ. Từ đúng: \"$correctWord\", người học trả lời: \"$answer\"."
+                        )
+                    }
+
+                    gameState = gameState.copy(
+                        selectedAnswer = answer,
+                        isCorrect = isCorrect,
+                        score = if (isCorrect) gameState.score + 1 else gameState.score,
+                        eloChange = gameState.eloChange + eloChange,
+                        showResult = true,
+                        correctAnswer = correctWord,
+                        isGrading = false,
+                        aiNote = aiNote
                     )
                 }
 
-                // Show mascot feedback
-                if (isCorrect) {
-                    MascotFeedbackManager.showCorrectFeedback()
+                // Exact match, easy (multiple choice) or AI off → grade locally (§10.1).
+                if (exact || difficultyMode != DifficultyMode.HARD || !AiManager.isAvailable()) {
+                    applyResult(exact, null)
                 } else {
-                    MascotFeedbackManager.showWrongFeedback()
+                    // Hard mode + typed answer differs from key → ask AI if it's
+                    // acceptable in meaning (near-correct / missing tones) (§6.1/6.3).
+                    gameState = gameState.copy(isGrading = true)
+                    scope.launch {
+                        when (val r = AiManager.gradeOpenAnswer(
+                            question = "Từ tiếng Việt đúng cho hình ảnh là gì?",
+                            expectedAnswer = correctWord,
+                            userAnswer = answer
+                        )) {
+                            is AiCallResult.Success ->
+                                applyResult(r.data.isAcceptable, r.data.feedback.ifBlank { null })
+                            is AiCallResult.Error ->
+                                applyResult(false, null) // fallback: strict local result
+                        }
+                    }
                 }
-
-                gameState = gameState.copy(
-                    selectedAnswer = answer,
-                    isCorrect = isCorrect,
-                    score = if (isCorrect) gameState.score + 1 else gameState.score,
-                    eloChange = gameState.eloChange + eloChange,
-                    showResult = true,
-                    correctAnswer = correctWord
-                )
             },
             onNextQuestion = {
                 if (gameState.questionNumber >= gameState.totalQuestions) {
@@ -150,29 +183,29 @@ private fun ImageToWordGameContent(
     onNextQuestion: () -> Unit,
     onUserInputChange: (String) -> Unit
 ) {
-    // State để kiểm soát hiển thị result
+    // State to control showing the result
     var showResultFeedback by remember { mutableStateOf(false) }
     var resultIsCorrect by remember { mutableStateOf(false) }
     var resultCorrectAnswer by remember { mutableStateOf("") }
 
-    // Khi có kết quả mới, hiển thị feedback
+    // When a new result arrives, show feedback
     LaunchedEffect(gameState.showResult) {
         if (gameState.showResult && gameState.isCorrect != null) {
-            // Lưu kết quả và hiển thị feedback
+            // Store the result and show feedback
             resultIsCorrect = gameState.isCorrect
             resultCorrectAnswer = gameState.correctAnswer
             showResultFeedback = true
 
-            // Chờ 1.5s
+            // Wait 1.5s
             delay(1500)
 
-            // Tắt feedback trước
+            // Hide feedback first
             showResultFeedback = false
 
-            // Chờ animation tắt hoàn toàn (300ms cho fadeOut)
+            // Wait for the exit animation to finish (300ms fadeOut)
             delay(300)
 
-            // Sau đó mới load câu hỏi mới
+            // Then load the next question
             onNextQuestion()
         }
     }
@@ -328,12 +361,21 @@ private fun ImageToWordGameContent(
                 Button(
                     onClick = { onAnswerSelected(gameState.userInput) },
                     modifier = Modifier.fillMaxWidth(),
-                    enabled = gameState.userInput.isNotBlank() && !showResultFeedback && !gameState.showResult,
+                    enabled = gameState.userInput.isNotBlank() && !showResultFeedback &&
+                        !gameState.showResult && !gameState.isGrading,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = VietRed
                     )
                 ) {
-                    Text("Kiểm tra")
+                    if (gameState.isGrading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(18.dp), color = Color.White, strokeWidth = 2.dp
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("AI đang chấm...")
+                    } else {
+                        Text("Kiểm tra")
+                    }
                 }
             }
 
@@ -352,12 +394,11 @@ private fun ImageToWordGameContent(
                         containerColor = if (resultIsCorrect) PrimaryGreen.copy(alpha = 0.1f) else VietRed.copy(alpha = 0.1f)
                     )
                 ) {
-                    Row(
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
                             text = if (resultIsCorrect) "🎉 Chính xác!" else "❌ Sai rồi! Đáp án: $resultCorrectAnswer",
@@ -365,6 +406,16 @@ private fun ImageToWordGameContent(
                             fontWeight = FontWeight.Medium,
                             color = if (resultIsCorrect) PrimaryGreen else VietRed
                         )
+                        // AI note when a near-correct answer was accepted (§6.3)
+                        gameState.aiNote?.let { note ->
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = "🤖 $note",
+                                fontSize = 13.sp,
+                                color = TextSecondary,
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
                 }
             }
@@ -476,7 +527,7 @@ private fun nextQuestion(currentState: ImageToWordGameState): ImageToWordGameSta
         questionNumber = currentState.questionNumber + 1,
         showResult = false,
         userInput = "",
-        correctAnswer = nextWord?.word ?: "" // Set correctAnswer ngay khi tạo câu mới
+        correctAnswer = nextWord?.word ?: "" // Set correctAnswer as soon as a new question is created
     )
 }
 

@@ -16,6 +16,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.vietforces.data.manager.AiManager
 import com.example.vietforces.data.manager.EncounteredItemsManager
 import com.example.vietforces.data.manager.NotificationManager
 import com.example.vietforces.data.manager.ProfileManager
@@ -47,6 +48,7 @@ class MainActivity : ComponentActivity() {
         NotificationManager.loadFromPreferences()
         ProfileManager.loadFromPreferences()
         EncounteredItemsManager.loadFromPreferences()
+        AiManager.loadFromPreferences()
 
         enableEdgeToEdge()
         setContent {
@@ -118,6 +120,15 @@ fun VietforcesApp() {
                     onNotificationClick = {
                         navController.navigate(Screen.Notification.route)
                     },
+                    onWritingPracticeClick = {
+                        navController.navigate(Screen.WritingPractice.route)
+                    },
+                    onLearningPathClick = {
+                        navController.navigate(Screen.LearningPath.route)
+                    },
+                    onRoleplayClick = {
+                        navController.navigate(Screen.Roleplay.route)
+                    },
                     onGameModeClick = { gameMode ->
                         when (gameMode) {
                             GameMode.IMAGE_TO_WORD -> {
@@ -173,6 +184,44 @@ fun VietforcesApp() {
                 NotificationScreen(
                     onBackClick = {
                         navController.popBackStack()
+                    }
+                )
+            }
+
+            // Writing Practice (AI-graded)
+            composable(Screen.WritingPractice.route) {
+                WritingPracticeScreen(
+                    onBackClick = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+
+            // Roleplay conversation tutor (AI chat)
+            composable(Screen.Roleplay.route) {
+                RoleplayScreen(
+                    onBackClick = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+
+            // Learning Path (AI-generated)
+            composable(Screen.LearningPath.route) {
+                LearningPathScreen(
+                    onBackClick = { navController.popBackStack() },
+                    onWritingClick = { navController.navigate(Screen.WritingPractice.route) },
+                    onModeClick = { gameMode ->
+                        val route = when (gameMode) {
+                            GameMode.IMAGE_TO_WORD -> Screen.ImageToWord.route
+                            GameMode.WORD_TO_IMAGE -> Screen.WordToImage.route
+                            GameMode.SYLLABLE_MATCH -> Screen.SyllableMatch.route
+                            GameMode.SENTENCE_ORDER -> Screen.SentenceOrder.route
+                            GameMode.FILL_BLANK -> Screen.FillBlank.route
+                            GameMode.WORD_CHAIN -> Screen.WordChain.route
+                            GameMode.WORD_SEARCH -> Screen.WordSearch.route
+                        }
+                        navController.navigate(route)
                     }
                 )
             }

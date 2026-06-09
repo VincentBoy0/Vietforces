@@ -17,7 +17,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.vietforces.data.manager.AiManager
 import com.example.vietforces.data.manager.SettingsManager
+import com.example.vietforces.data.remote.OpenAiClient
 import com.example.vietforces.ui.theme.*
 
 /**
@@ -74,6 +76,9 @@ fun SettingsScreen(
                 }
             )
 
+            // AI Settings Card
+            AiSettingsCard()
+
             // Preview Card
             MascotPreviewCard(
                 mascotSizeMultiplier = mascotSizeMultiplier,
@@ -124,6 +129,104 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
         }
+    }
+}
+
+/**
+ * AI feedback toggles (§7.8). Shows a hint when the API key is missing.
+ */
+@Composable
+private fun AiSettingsCard() {
+    var aiFeedback by remember { mutableStateOf(AiManager.aiFeedbackEnabled) }
+    var aiMascot by remember { mutableStateOf(AiManager.aiMascotEnabled) }
+    val configured = remember { OpenAiClient.isConfigured() }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp)
+        ) {
+            Text(
+                text = "🤖 Trí tuệ nhân tạo",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = TextPrimary
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            ToggleRow(
+                title = "AI chấm & nhận xét",
+                subtitle = "Chấm bài viết, câu trả lời mở",
+                checked = aiFeedback,
+                onCheckedChange = {
+                    aiFeedback = it
+                    AiManager.updateAiFeedback(it)
+                }
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            ToggleRow(
+                title = "AI phản hồi Linh vật",
+                subtitle = "Linh vật nói câu động viên tự nhiên",
+                checked = aiMascot,
+                onCheckedChange = {
+                    aiMascot = it
+                    AiManager.updateAiMascot(it)
+                }
+            )
+
+            if (!configured) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = Color(0xFFFFF3E0),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "⚠️ Chưa có API key. Thêm OPENAI_API_KEY vào local.properties rồi build lại để dùng AI.",
+                        modifier = Modifier.padding(12.dp),
+                        fontSize = 12.sp,
+                        color = Color(0xFF8D6E00),
+                        lineHeight = 16.sp
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ToggleRow(
+    title: String,
+    subtitle: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(text = title, fontSize = 14.sp, fontWeight = FontWeight.Medium, color = TextPrimary)
+            Text(text = subtitle, fontSize = 12.sp, color = TextSecondary)
+        }
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = Color.White,
+                checkedTrackColor = VietRed
+            )
+        )
     }
 }
 

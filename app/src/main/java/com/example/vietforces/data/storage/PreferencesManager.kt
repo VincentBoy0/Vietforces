@@ -58,6 +58,13 @@ object PreferencesManager {
     // Keys for Encountered Items (spaced repetition)
     private const val KEY_ENCOUNTERED_ITEMS_PREFIX = "encountered_items_"
 
+    // Keys for AI settings
+    private const val KEY_AI_FEEDBACK_ENABLED = "ai_feedback_enabled"
+    private const val KEY_AI_MASCOT_ENABLED = "ai_mascot_enabled"
+
+    // Key prefix for saved roleplay conversations (one entry per scenario id).
+    private const val KEY_ROLEPLAY_PREFIX = "roleplay_session_"
+
     private var prefs: SharedPreferences? = null
 
     /**
@@ -88,6 +95,41 @@ object PreferencesManager {
 
     fun getMascotTextSizeMultiplier(): Float {
         return getPrefs().getFloat(KEY_MASCOT_TEXT_SIZE, 1.0f)
+    }
+
+    // ==================== AI SETTINGS ====================
+
+    fun saveAiFeedbackEnabled(enabled: Boolean) {
+        getPrefs().edit().putBoolean(KEY_AI_FEEDBACK_ENABLED, enabled).apply()
+    }
+
+    fun getAiFeedbackEnabled(): Boolean {
+        return getPrefs().getBoolean(KEY_AI_FEEDBACK_ENABLED, true)
+    }
+
+    fun saveAiMascotEnabled(enabled: Boolean) {
+        getPrefs().edit().putBoolean(KEY_AI_MASCOT_ENABLED, enabled).apply()
+    }
+
+    fun getAiMascotEnabled(): Boolean {
+        return getPrefs().getBoolean(KEY_AI_MASCOT_ENABLED, true)
+    }
+
+    // ==================== ROLEPLAY SESSIONS ====================
+
+    /** Persist a roleplay conversation (serialized JSON) for one scenario. */
+    fun saveRoleplaySession(scenarioId: String, json: String) {
+        getPrefs().edit().putString(KEY_ROLEPLAY_PREFIX + scenarioId, json).apply()
+    }
+
+    /** Restore a saved roleplay conversation, or null if none was saved. */
+    fun getRoleplaySession(scenarioId: String): String? {
+        return getPrefs().getString(KEY_ROLEPLAY_PREFIX + scenarioId, null)
+    }
+
+    /** Forget the saved conversation for a scenario ("start over"). */
+    fun clearRoleplaySession(scenarioId: String) {
+        getPrefs().edit().remove(KEY_ROLEPLAY_PREFIX + scenarioId).apply()
     }
 
     // ==================== USER SESSION ====================

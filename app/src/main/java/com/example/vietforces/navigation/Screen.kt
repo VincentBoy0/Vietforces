@@ -12,6 +12,9 @@ sealed class Screen(val route: String) {
 
     // Other screens
     object Notification : Screen("notification")
+    object WritingPractice : Screen("writing_practice")
+    object LearningPath : Screen("learning_path")
+    object Roleplay : Screen("roleplay")
 
     // Game mode screens
     object ImageToWord : Screen("game/image_to_word")

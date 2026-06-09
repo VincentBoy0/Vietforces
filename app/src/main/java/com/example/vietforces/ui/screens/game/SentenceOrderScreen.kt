@@ -44,7 +44,7 @@ data class SentenceOrderGameState(
     val totalQuestions: Int = 10,
     val eloChange: Int = 0,
     val showResult: Boolean = false,
-    val correctSentence: String = "" // Lưu câu đúng để tránh flicker khi chuyển câu
+    val correctSentence: String = "" // Keep the correct sentence to avoid flicker during transition
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -110,11 +110,17 @@ fun SentenceOrderScreen(
                     )
                 }
 
-                // Show mascot feedback
+                // Show mascot feedback (with context so AI can react specifically)
+                val correctSentence = gameState.currentSentence?.fullSentence ?: ""
+                val userOrder = gameState.selectedWords.joinToString(" ")
                 if (isCorrect) {
-                    MascotFeedbackManager.showCorrectFeedback()
+                    MascotFeedbackManager.showCorrectFeedback(
+                        "Bài xếp câu. Người học xếp đúng câu: \"$correctSentence\"."
+                    )
                 } else {
-                    MascotFeedbackManager.showWrongFeedback()
+                    MascotFeedbackManager.showWrongFeedback(
+                        "Bài xếp câu. Câu đúng: \"$correctSentence\". Người học xếp: \"$userOrder\"."
+                    )
                 }
 
                 gameState = gameState.copy(
@@ -159,29 +165,29 @@ private fun SentenceOrderGameContent(
     onNextQuestion: () -> Unit,
     onClearSelection: () -> Unit
 ) {
-    // State để kiểm soát hiển thị result
+    // State to control showing the result
     var showResultFeedback by remember { mutableStateOf(false) }
     var resultIsCorrect by remember { mutableStateOf(false) }
     var resultCorrectSentence by remember { mutableStateOf("") }
 
-    // Khi có kết quả mới, hiển thị feedback
+    // When a new result arrives, show feedback
     LaunchedEffect(gameState.showResult) {
         if (gameState.showResult && gameState.isCorrect != null) {
-            // Lưu kết quả và hiển thị feedback
+            // Store the result and show feedback
             resultIsCorrect = gameState.isCorrect
             resultCorrectSentence = gameState.correctSentence
             showResultFeedback = true
 
-            // Chờ 2s
+            // Wait 2s
             delay(2000)
 
-            // Tắt feedback trước
+            // Hide feedback first
             showResultFeedback = false
 
-            // Chờ animation tắt hoàn toàn (300ms cho fadeOut)
+            // Wait for the exit animation to finish (300ms fadeOut)
             delay(300)
 
-            // Sau đó mới load câu hỏi mới
+            // Then load the next question
             onNextQuestion()
         }
     }
