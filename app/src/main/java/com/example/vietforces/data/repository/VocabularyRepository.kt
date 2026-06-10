@@ -17,7 +17,7 @@ object VocabularyRepository {
      * Used for: Image to Word, Word to Image, Syllable Matching games
      */
     val allVocabulary: List<VocabularyItem> = listOf(
-        // ==================== ĐỘNG VẬT (20 từ) ====================
+        // ==================== ANIMALS (20 words) ====================
         VocabularyItem(
             id = "animal_001", word = "mèo", classifier = "con",
             imageResId = R.drawable.animal_001,
@@ -119,7 +119,7 @@ object VocabularyRepository {
             distractors = listOf("vượn", "sóc", "thỏ"), category = "animals", difficulty = 1
         ),
 
-        // ==================== ĐỒ DÙNG HỌC TẬP (12 từ) ====================
+        // ==================== SCHOOL SUPPLIES (12 words) ====================
         VocabularyItem(
             id = "school_001", word = "bút", classifier = "cây",
             imageResId = R.drawable.school_001,
@@ -181,7 +181,7 @@ object VocabularyRepository {
             distractors = listOf("cặp", "túi", "bao"), category = "school", difficulty = 1
         ),
 
-        // ==================== ĐỒ GIA DỤNG (13 từ) ====================
+        // ==================== HOUSEHOLD ITEMS (13 words) ====================
         VocabularyItem(
             id = "household_001", word = "bàn", classifier = "cái",
             imageResId = R.drawable.household_001,
@@ -248,7 +248,7 @@ object VocabularyRepository {
             distractors = listOf("khóa", "cửa", "móc"), category = "household", difficulty = 1
         ),
 
-        // ==================== ĐỒ BẾP (12 từ) ====================
+        // ==================== KITCHEN (12 words) ====================
         VocabularyItem(
             id = "kitchen_001", word = "nồi", classifier = "cái",
             imageResId = R.drawable.kitchen_001,
@@ -310,7 +310,7 @@ object VocabularyRepository {
             distractors = listOf("nồi", "bình", "chảo"), category = "kitchen", difficulty = 1
         ),
 
-        // ==================== THỰC PHẨM & ĐỒ UỐNG (20 từ) ====================
+        // ==================== FOOD & DRINKS (20 words) ====================
         VocabularyItem(
             id = "food_001", word = "bánh mì", classifier = null,
             imageResId = R.drawable.food_001,
@@ -412,7 +412,7 @@ object VocabularyRepository {
             distractors = listOf("nước cam", "nước dừa", "nước chanh"), category = "food", difficulty = 1
         ),
 
-        // ==================== ĐỊA ĐIỂM (15 từ) ====================
+        // ==================== PLACES (15 words) ====================
         VocabularyItem(
             id = "place_001", word = "ngôi nhà", classifier = null,
             imageResId = R.drawable.place_001,
@@ -489,7 +489,7 @@ object VocabularyRepository {
             distractors = listOf("bệnh viện", "phòng khám", "bưu điện"), category = "places", difficulty = 1
         ),
 
-        // ==================== PHƯƠNG TIỆN (6 từ) ====================
+        // ==================== VEHICLES (6 words) ====================
         VocabularyItem(
             id = "vehicle_001", word = "xe máy", classifier = null,
             imageResId = R.drawable.vehicle_001,
@@ -521,7 +521,7 @@ object VocabularyRepository {
             distractors = listOf("tàu hỏa", "trực thăng", "tàu thủy"), category = "vehicles", difficulty = 1
         ),
 
-        // ==================== CƠ THỂ & TRANG PHỤC (11 từ) ====================
+        // ==================== BODY & CLOTHING (11 words) ====================
         VocabularyItem(
             id = "body_001", word = "mái tóc", classifier = null,
             imageResId = R.drawable.body_001,
@@ -961,7 +961,7 @@ object VocabularyRepository {
      * Format: vietnamese|english|noAccent (grid_word)
      */
     val wordDataset: List<WordItem> = listOf(
-        // ==================== ĐỒ VẬT & GIA DỤNG ====================
+        // ==================== OBJECTS & HOUSEHOLD ====================
         WordItem("cái bàn", "table", "caiban", "household"),
         WordItem("cái ghế", "chair", "caighe", "household"),
         WordItem("cái giường", "bed", "caigiuong", "household"),
@@ -1004,7 +1004,7 @@ object VocabularyRepository {
         WordItem("cái chai", "bottle", "caichai", "household"),
         WordItem("cái bình", "jug", "caibinh", "household"),
 
-        // ==================== ĐỒ HỌC TẬP & VĂN PHÒNG ====================
+        // ==================== SCHOOL & OFFICE SUPPLIES ====================
         WordItem("cây bút", "pen", "caybut", "school"),
         WordItem("bút chì", "pencil", "butchi", "school"),
         WordItem("cục tẩy", "eraser", "cuctay", "school"),
@@ -1031,7 +1031,7 @@ object VocabularyRepository {
         WordItem("máy in", "printer", "mayin", "school"),
         WordItem("máy ảnh", "camera", "mayanh", "school"),
 
-        // ==================== ĐỒ BẾP ====================
+        // ==================== KITCHEN ====================
         WordItem("cái nồi", "pot", "cainoi", "kitchen"),
         WordItem("cái chảo", "pan", "caichao", "kitchen"),
         WordItem("cái thớt", "cutting board", "caithot", "kitchen"),
@@ -1051,7 +1051,7 @@ object VocabularyRepository {
         WordItem("chảo chống dính", "non-stick pan", "chaochongdinh", "kitchen"),
         WordItem("khăn lau", "cleaning cloth", "khanlau", "kitchen"),
 
-        // ==================== THỰC PHẨM & ĐỒ UỐNG ====================
+        // ==================== FOOD & DRINKS ====================
         WordItem("bánh mì", "bread", "banhmi", "food"),
         WordItem("cơm", "rice", "com", "food"),
         WordItem("mì", "noodles", "mi", "food"),
@@ -1097,7 +1097,7 @@ object VocabularyRepository {
         WordItem("xoài", "mango", "xoai", "food"),
         WordItem("dứa", "pineapple", "dua", "food"),
 
-        // ==================== ĐỘNG VẬT ====================
+        // ==================== ANIMALS ====================
         WordItem("con mèo", "cat", "conmeo", "animals"),
         WordItem("con chó", "dog", "concho", "animals"),
         WordItem("con gà", "chicken", "conga", "animals"),
@@ -1120,7 +1120,7 @@ object VocabularyRepository {
         WordItem("con khỉ", "monkey", "conkhi", "animals"),
         WordItem("con cá mập", "shark", "concamap", "animals"),
 
-        // ==================== ĐỊA ĐIỂM ====================
+        // ==================== PLACES ====================
         WordItem("ngôi nhà", "house", "ngoinha", "places"),
         WordItem("phòng khách", "living room", "phongkhach", "places"),
         WordItem("phòng ngủ", "bedroom", "phongngu", "places"),
@@ -1149,7 +1149,7 @@ object VocabularyRepository {
         WordItem("rạp phim", "cinema", "rapphim", "places"),
         WordItem("sân vận động", "stadium", "sanvandong", "places"),
 
-        // ==================== PHƯƠNG TIỆN ====================
+        // ==================== VEHICLES ====================
         WordItem("xe máy", "motorbike", "xemay", "vehicles"),
         WordItem("xe đạp", "bicycle", "xedap", "vehicles"),
         WordItem("ô tô", "car", "oto", "vehicles"),
@@ -1159,7 +1159,7 @@ object VocabularyRepository {
         WordItem("tàu điện", "metro", "taudien", "vehicles"),
         WordItem("thuyền", "boat", "thuyen", "vehicles"),
 
-        // ==================== MÀU SẮC ====================
+        // ==================== COLORS ====================
         WordItem("màu đỏ", "red", "maudo", "colors"),
         WordItem("màu xanh", "blue/green", "mauxanh", "colors"),
         WordItem("màu vàng", "yellow", "mauvang", "colors"),
@@ -1191,7 +1191,7 @@ object VocabularyRepository {
         WordItem("trời nóng", "hot", "troinong", "weather"),
         WordItem("mây mù", "foggy", "maymu", "weather"),
 
-        // ==================== ĐỘNG TỪ CƠ BẢN ====================
+        // ==================== BASIC VERBS ====================
         WordItem("ăn", "eat", "an", "verbs"),
         WordItem("uống", "drink", "uong", "verbs"),
         WordItem("đi", "go", "di", "verbs"),
@@ -1223,7 +1223,7 @@ object VocabularyRepository {
         WordItem("khóc", "cry", "khoc", "verbs"),
         WordItem("nấu", "cook", "nau", "verbs"),
 
-        // ==================== TÍNH TỪ CƠ BẢN ====================
+        // ==================== BASIC ADJECTIVES ====================
         WordItem("đẹp", "beautiful", "dep", "adjectives"),
         WordItem("xấu", "ugly", "xau", "adjectives"),
         WordItem("cao", "tall/high", "cao", "adjectives"),

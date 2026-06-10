@@ -22,8 +22,16 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import com.example.vietforces.data.manager.AiManager
 import com.example.vietforces.data.manager.SettingsManager
+import com.example.vietforces.data.model.AiCallResult
+import com.example.vietforces.data.remote.OpenAiClient
 import com.example.vietforces.ui.theme.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 /**
@@ -36,9 +44,15 @@ enum class MascotFeedbackType {
 }
 
 /**
- * Singleton to manage mascot feedback from anywhere in the app
+ * Singleton to manage mascot feedback from anywhere in the app.
+ *
+ * Shows an instant hardcoded reaction for snappy UX, then optionally upgrades it
+ * to a natural AI-generated message (§5). AI calls are throttled and only fire
+ * when the user enabled the toggle and a key is configured (§12).
  */
 object MascotFeedbackManager {
+    private val scope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
+
     var currentFeedback by mutableStateOf<MascotFeedbackType>(MascotFeedbackType.IDLE)
         private set
     var feedbackMessage by mutableStateOf("")
@@ -46,22 +60,37 @@ object MascotFeedbackManager {
     var showFeedback by mutableStateOf(false)
         private set
 
+    /** Bumped on every change (new feedback or AI replacement) so the UI can
+     *  reset its auto-hide timer. */
+    var feedbackStamp by mutableIntStateOf(0)
+        private set
+
+    private var aiJob: Job? = null
+    private var lastAiAt: Long = 0L
+    private const val AI_THROTTLE_MS = 6000L
+
     /**
-     * Show feedback when user answers correctly
+     * Show feedback when user answers correctly.
+     * @param context optional detail (e.g. the word) so AI can react specifically.
      */
-    fun showCorrectFeedback() {
+    fun showCorrectFeedback(context: String? = null) {
         feedbackMessage = getCorrectMessage()
         currentFeedback = MascotFeedbackType.CORRECT
         showFeedback = true
+        feedbackStamp++
+        maybeFetchAi(wasCorrect = true, context = context)
     }
 
     /**
-     * Show feedback when user answers incorrectly
+     * Show feedback when user answers incorrectly.
+     * @param context optional detail (e.g. correct answer vs user answer).
      */
-    fun showWrongFeedback() {
+    fun showWrongFeedback(context: String? = null) {
         feedbackMessage = getWrongMessage()
         currentFeedback = MascotFeedbackType.WRONG
         showFeedback = true
+        feedbackStamp++
+        maybeFetchAi(wasCorrect = false, context = context)
     }
 
     /**
@@ -70,6 +99,32 @@ object MascotFeedbackManager {
     fun hideFeedback() {
         showFeedback = false
         currentFeedback = MascotFeedbackType.IDLE
+        aiJob?.cancel()
+    }
+
+    /** Replace the instant message with an AI reaction when allowed + not throttled. */
+    private fun maybeFetchAi(wasCorrect: Boolean, context: String?) {
+        if (!AiManager.aiMascotEnabled || !OpenAiClient.isConfigured()) return
+        val now = System.currentTimeMillis()
+        if (now - lastAiAt < AI_THROTTLE_MS) return
+        lastAiAt = now
+
+        val situation = buildString {
+            append(if (wasCorrect) "Người học vừa trả lời ĐÚNG. " else "Người học vừa trả lời SAI. ")
+            if (!context.isNullOrBlank()) append(context)
+        }
+
+        aiJob?.cancel()
+        aiJob = scope.launch {
+            when (val r = AiManager.mascotReact(situation)) {
+                is AiCallResult.Success ->
+                    if (showFeedback && r.data.message.isNotBlank()) {
+                        feedbackMessage = r.data.message
+                        feedbackStamp++ // reset the auto-hide timer for the new text
+                    }
+                is AiCallResult.Error -> { /* keep the instant fallback */ }
+            }
+        }
     }
 
     /**
@@ -192,6 +247,7 @@ fun DraggableMascot(
     val showFeedback = MascotFeedbackManager.showFeedback
     val feedbackMessage = MascotFeedbackManager.feedbackMessage
     val feedbackType = MascotFeedbackManager.currentFeedback
+    val feedbackStamp = MascotFeedbackManager.feedbackStamp
 
     // Always keep rooster emoji - don't change on feedback
     val mascotEmoji = "🐓"
@@ -204,10 +260,11 @@ fun DraggableMascot(
         else -> RoosterOrange
     }
 
-    // Auto-hide feedback after delay
-    LaunchedEffect(showFeedback) {
+    // Auto-hide feedback after delay. Keyed on feedbackStamp so an incoming AI
+    // message resets the timer (gives the AI reaction its full time on screen).
+    LaunchedEffect(feedbackStamp, showFeedback) {
         if (showFeedback) {
-            kotlinx.coroutines.delay(2000)
+            kotlinx.coroutines.delay(3500)
             MascotFeedbackManager.hideFeedback()
         }
     }

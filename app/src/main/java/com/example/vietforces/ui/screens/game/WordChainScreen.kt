@@ -874,7 +874,9 @@ private fun processPlayerWord(gameState: WordChainGameState): WordChainGameState
 
     // Check if word is in dictionary
     if (matchedWord == null || (matchedWord !in gameState.availableWords && matchedWord !in VocabularyRepository.wordChainWords)) {
-        MascotFeedbackManager.showWrongFeedback()
+        MascotFeedbackManager.showWrongFeedback(
+            "Bài nối từ. Người học nhập \"$inputWord\" nhưng từ này không có trong từ điển."
+        )
         return gameState.copy(errorMessage = "Từ \"$inputWord\" không có trong từ điển!")
     }
 
@@ -882,7 +884,9 @@ private fun processPlayerWord(gameState: WordChainGameState): WordChainGameState
 
     // Check if word already used
     if (word in gameState.usedWords) {
-        MascotFeedbackManager.showWrongFeedback()
+        MascotFeedbackManager.showWrongFeedback(
+            "Bài nối từ. Từ \"$word\" đã được dùng trước đó rồi."
+        )
         return gameState.copy(errorMessage = "Từ \"$word\" đã được sử dụng!")
     }
 
@@ -891,13 +895,17 @@ private fun processPlayerWord(gameState: WordChainGameState): WordChainGameState
         val lastWord = gameState.wordChain.last().word
         val requiredChar = getLastChar(lastWord)
         if (!wordStartsWith(word, requiredChar)) {
-            MascotFeedbackManager.showWrongFeedback()
+            MascotFeedbackManager.showWrongFeedback(
+                "Bài nối từ. Từ phải bắt đầu bằng chữ \"$requiredChar\" (chữ cuối của từ trước)."
+            )
             return gameState.copy(errorMessage = "Từ phải bắt đầu bằng \"$requiredChar\"!")
         }
     }
 
     // Valid word - add to chain
-    MascotFeedbackManager.showCorrectFeedback()
+    MascotFeedbackManager.showCorrectFeedback(
+        "Bài nối từ. Người học nối đúng từ \"$word\"."
+    )
 
     // Record encounter for spaced repetition
     EncounteredItemsManager.recordEncounter(GameMode.WORD_CHAIN, word, wasCorrect = true)

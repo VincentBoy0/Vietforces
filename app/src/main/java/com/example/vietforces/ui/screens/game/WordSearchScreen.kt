@@ -791,7 +791,9 @@ private fun checkSelectedWord(gameState: WordSearchGameState): WordSearchGameSta
 
     if (foundWord != null) {
         // Word found!
-        MascotFeedbackManager.showCorrectFeedback()
+        MascotFeedbackManager.showCorrectFeedback(
+            "Bài tìm từ trong ma trận. Người học tìm thấy từ \"${foundWord.word}\"."
+        )
         val eloChange = UserProgressManager.recordCorrectAnswer(1)
         val newFoundWords = gameState.foundWords + foundWord.word
 
@@ -826,7 +828,9 @@ private fun checkSelectedWord(gameState: WordSearchGameState): WordSearchGameSta
         )
     } else {
         // Word not found - clear selection
-        MascotFeedbackManager.showWrongFeedback()
+        MascotFeedbackManager.showWrongFeedback(
+            "Bài tìm từ trong ma trận. Người học chọn dãy ô nhưng chưa tạo thành từ đúng."
+        )
         val newGrid = gameState.grid.map { rowCells ->
             rowCells.map { cell -> cell.copy(isSelected = false) }
         }
