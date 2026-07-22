@@ -155,7 +155,13 @@ Plans:
   4. The analytics dashboard shows DAU for the last 30 days, top game modes by play count, and average session length as charts — data sourced from Supabase
   5. An admin can view the daily challenge schedule, create a manual challenge for a specific date, and override the auto-generated one — confirmed by the Android app loading the manually created challenge on that date
 
-**Plans**: 00-01-PLAN.md ✓, 00-02-PLAN.md ✓
+**Plans:** 4 plans
+Plans:
+- [ ] 06-01-PLAN.md — SQL migration 008 (is_admin + words table) + Next.js scaffold + auth middleware + admin layout (ADMIN-01)
+- [ ] 06-02-PLAN.md — Vocabulary CRUD: list page + create form + edit/delete form with Supabase Storage image upload (ADMIN-02, ADMIN-03, ADMIN-04)
+- [ ] 06-03-PLAN.md — User management table + ban/unban Server Actions (ADMIN-05, ADMIN-06)
+- [ ] 06-04-PLAN.md — Analytics dashboard (DAU + top modes Recharts) + Daily challenge manual scheduler with override (ADMIN-07, ADMIN-08)
+
 **UI hint**: yes
 
 ---
