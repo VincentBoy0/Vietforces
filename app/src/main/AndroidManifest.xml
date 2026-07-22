@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:name=".VietForcesApplication"
@@ -32,6 +33,15 @@
                 <data android:scheme="vietforces" android:host="login" />
             </intent-filter>
         </activity>
+
+        <!-- Firebase Cloud Messaging service -->
+        <service
+            android:name=".VietForcesFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

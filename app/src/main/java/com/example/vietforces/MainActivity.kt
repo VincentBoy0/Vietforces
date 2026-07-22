@@ -1,11 +1,16 @@
 package com.example.vietforces
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.jan.supabase.SupabaseClient
@@ -76,6 +81,24 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
 
+        // Request POST_NOTIFICATIONS permission on Android 13+ (NOTIF-05)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                    1001
+                )
+            }
+        }
+
+        // Handle deep-link extras from FCM notification taps (NOTIF-04)
+        handleFcmNavigationIntent(intent)
+
         // Handle deep links for Google OAuth callback
         lifecycleScope.launch { supabase.handleDeeplinks(intent) }
 
@@ -90,6 +113,23 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         lifecycleScope.launch { supabase.handleDeeplinks(intent) }
+        handleFcmNavigationIntent(intent)
+    }
+
+    /**
+     * Reads the FCM "navigate_to" extra set by [VietForcesFirebaseMessagingService]
+     * and stores it so the Compose NavHost can consume it once navigation is ready.
+     * Currently supported values: "daily_challenge".
+     */
+    private fun handleFcmNavigationIntent(intent: Intent?) {
+        val navigateTo = intent?.getStringExtra("navigate_to") ?: return
+        // Store destination so VietforcesApp can consume it via NavController.
+        pendingNavigationDestination = navigateTo
+    }
+
+    companion object {
+        /** Navigation destination requested via FCM notification tap, consumed by VietforcesApp. */
+        var pendingNavigationDestination: String? = null
     }
 
     /**

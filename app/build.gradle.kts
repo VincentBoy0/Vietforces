@@ -95,6 +95,7 @@ dependencies {
     implementation(libs.hilt.navigation.compose)
     implementation(libs.lifecycle.runtime.compose)
     implementation(libs.work.runtime.ktx)
+    implementation(libs.firebase.messaging.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

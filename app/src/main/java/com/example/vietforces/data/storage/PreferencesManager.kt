@@ -62,6 +62,10 @@ object PreferencesManager {
     private const val KEY_AI_FEEDBACK_ENABLED = "ai_feedback_enabled"
     private const val KEY_AI_MASCOT_ENABLED = "ai_mascot_enabled"
 
+    // Keys for Push Notification preferences (NOTIF-01)
+    private const val KEY_NOTIF_STREAK_ENABLED = "notif_streak_enabled"
+    private const val KEY_NOTIF_DAILY_ENABLED = "notif_daily_enabled"
+
     // Key prefix for saved roleplay conversations (one entry per scenario id).
     private const val KEY_ROLEPLAY_PREFIX = "roleplay_session_"
 
@@ -123,6 +127,24 @@ object PreferencesManager {
 
     fun getAiMascotEnabled(): Boolean {
         return getPrefs().getBoolean(KEY_AI_MASCOT_ENABLED, true)
+    }
+
+    // ==================== PUSH NOTIFICATION PREFERENCES ====================
+
+    fun setNotifStreakEnabled(enabled: Boolean) {
+        getPrefs().edit().putBoolean(KEY_NOTIF_STREAK_ENABLED, enabled).apply()
+    }
+
+    fun getNotifStreakEnabled(): Boolean {
+        return getPrefs().getBoolean(KEY_NOTIF_STREAK_ENABLED, true)
+    }
+
+    fun setNotifDailyEnabled(enabled: Boolean) {
+        getPrefs().edit().putBoolean(KEY_NOTIF_DAILY_ENABLED, enabled).apply()
+    }
+
+    fun getNotifDailyEnabled(): Boolean {
+        return getPrefs().getBoolean(KEY_NOTIF_DAILY_ENABLED, true)
     }
 
     // ==================== ONBOARDING / GUEST ====================

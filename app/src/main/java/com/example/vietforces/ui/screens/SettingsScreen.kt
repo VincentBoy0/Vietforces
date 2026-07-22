@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import com.example.vietforces.data.manager.AiManager
 import com.example.vietforces.data.manager.SettingsManager
 import com.example.vietforces.data.remote.OpenAiClient
+import com.example.vietforces.data.storage.PreferencesManager
 import com.example.vietforces.ui.theme.*
 
 /**
@@ -83,6 +84,9 @@ fun SettingsScreen(
 
             // AI Settings Card
             AiSettingsCard()
+
+            // Notification Settings Card (NOTIF-01)
+            NotificationSettingsCard()
 
             // Preview Card
             MascotPreviewCard(
@@ -172,6 +176,61 @@ fun SettingsScreen(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
+
+/**
+ * Notification settings toggles (NOTIF-01).
+ * Allows the user to independently enable/disable streak-reminder and
+ * daily-challenge push notifications.
+ */
+@Composable
+private fun NotificationSettingsCard() {
+    var notifStreak by remember { mutableStateOf(PreferencesManager.getNotifStreakEnabled()) }
+    var notifDaily  by remember { mutableStateOf(PreferencesManager.getNotifDailyEnabled()) }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp)
+        ) {
+            Text(
+                text = "🔔 Thông báo",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = TextPrimary
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            ToggleRow(
+                title = "Nhắc nhở streak",
+                subtitle = "Cảnh báo khi streak sắp bị mất",
+                checked = notifStreak,
+                onCheckedChange = {
+                    notifStreak = it
+                    PreferencesManager.setNotifStreakEnabled(it)
+                }
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            ToggleRow(
+                title = "Thách đấu hàng ngày",
+                subtitle = "Thông báo thách đấu mới mỗi ngày",
+                checked = notifDaily,
+                onCheckedChange = {
+                    notifDaily = it
+                    PreferencesManager.setNotifDailyEnabled(it)
+                }
+            )
         }
     }
 }
