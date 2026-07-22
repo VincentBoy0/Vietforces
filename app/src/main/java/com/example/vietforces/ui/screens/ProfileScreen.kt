@@ -25,6 +25,7 @@ import com.example.vietforces.data.manager.ProfileManager
 import com.example.vietforces.data.manager.UserProgressManager
 import com.example.vietforces.data.model.EloRank
 import com.example.vietforces.data.model.EloRankUtils
+import com.example.vietforces.data.storage.PreferencesManager
 import com.example.vietforces.ui.theme.*
 
 /**
@@ -34,9 +35,55 @@ import com.example.vietforces.ui.theme.*
 @Suppress("UNUSED_PARAMETER")
 @Composable
 fun ProfileScreen(
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
+    onNavigateToRegister: () -> Unit = {}
 ) {
     val scrollState = rememberScrollState()
+
+    // Guest mode flags
+    val isGuest = remember { PreferencesManager.getIsGuest() }
+    val promptAlreadyShown = remember { PreferencesManager.getGuestPromptShown() }
+    val totalGamesPlayed = remember {
+        UserProgressManager.getAllGameModeStats().values.sumOf { it.gamesPlayed }
+    }
+    var showGuestDialog by remember { mutableStateOf(false) }
+
+    // Show one-time post-game dialog nudge
+    LaunchedEffect(isGuest, totalGamesPlayed, promptAlreadyShown) {
+        if (isGuest && totalGamesPlayed >= 1 && !promptAlreadyShown) {
+            showGuestDialog = true
+        }
+    }
+
+    if (showGuestDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showGuestDialog = false
+                PreferencesManager.setGuestPromptShown(true)
+            },
+            title = { Text("🎉 Bạn đang tiến bộ!") },
+            text = {
+                Text("Tạo tài khoản miễn phí để lưu tiến độ lên cloud và không bao giờ mất dữ liệu.")
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    PreferencesManager.setGuestPromptShown(true)
+                    showGuestDialog = false
+                }) {
+                    Text("Để sau", color = TextSecondary)
+                }
+            },
+            dismissButton = {
+                Button(onClick = {
+                    PreferencesManager.setGuestPromptShown(true)
+                    showGuestDialog = false
+                    onNavigateToRegister()
+                }) {
+                    Text("Đăng ký ngay")
+                }
+            }
+        )
+    }
 
     // User data from ProfileManager (persisted in SharedPreferences)
     var fullName by remember { mutableStateOf(ProfileManager.name.ifEmpty { "Chưa cập nhật" }) }
@@ -92,6 +139,49 @@ fun ProfileScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // Guest banner card (shown only for guest users)
+            if (isGuest) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = VietRed.copy(alpha = 0.08f)),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, VietRed.copy(alpha = 0.3f))
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                "💾 Lưu tiến độ lên cloud",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = VietRed
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                "Tạo tài khoản miễn phí để không mất dữ liệu",
+                                fontSize = 12.sp,
+                                color = TextSecondary
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(
+                            onClick = {
+                                PreferencesManager.setGuestPromptShown(true)
+                                onNavigateToRegister()
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = VietRed),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                        ) {
+                            Text("Đăng ký", fontSize = 13.sp)
+                        }
+                    }
+                }
+            }
+
             // Profile Header Card with Avatar and Elo
             ProfileHeaderCard(
                 fullName = fullName,

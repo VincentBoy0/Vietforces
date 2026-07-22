@@ -95,6 +95,10 @@ fun VietforcesApp() {
     val authViewModel: AuthViewModel = hiltViewModel()
     val authState by authViewModel.authState.collectAsStateWithLifecycle()
 
+    // Determine start destination based on onboarding completion
+    val onboardingCompleted = remember { PreferencesManager.getOnboardingCompleted() }
+    val startDestination = if (!onboardingCompleted) Screen.Onboarding.route else Screen.Main.route
+
     // If user is authenticated and currently on an auth screen, navigate to Main
     LaunchedEffect(authState, currentRoute) {
         if (authState is AuthState.Authenticated &&
@@ -142,9 +146,20 @@ fun VietforcesApp() {
         ) { innerPadding ->
             NavHost(
                 navController = navController,
-                startDestination = Screen.Main.route,
+                startDestination = startDestination,
                 modifier = Modifier.padding(innerPadding)
             ) {
+            // Onboarding Screen (shown on first launch)
+            composable(Screen.Onboarding.route) {
+                OnboardingScreen(
+                    onFinish = {
+                        navController.navigate(Screen.Main.route) {
+                            popUpTo(Screen.Onboarding.route) { inclusive = true }
+                        }
+                    }
+                )
+            }
+
             // Main Screen
             composable(Screen.Main.route) {
                 MainScreen(
@@ -206,7 +221,11 @@ fun VietforcesApp() {
 
             // Profile Screen
             composable(Screen.Profile.route) {
-                ProfileScreen()
+                ProfileScreen(
+                    onNavigateToRegister = {
+                        navController.navigate(Screen.Register.route)
+                    }
+                )
             }
 
             // Settings Screen
