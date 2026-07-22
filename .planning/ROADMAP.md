@@ -186,7 +186,7 @@ Plans:
 | 0. Pre-work Fixes | 2/2 | **Complete** ✓ | 2026-07-22 |
 | 1. Supabase Foundation | 4/4 | Not started | - |
 | 2. Auth + Onboarding + Sync + UX | 3/4 | In Progress|  |
-| 3. Streak + Leaderboard | 0/? | Not started | - |
+| 3. Streak + Leaderboard | 2/4 | In Progress|  |
 | 4. Daily Challenge + Notifications | 0/? | Not started | - |
 | 5. Social / Friends | 0/? | Not started | - |
 | 6. Web Admin Dashboard | 0/? | Not started | - |

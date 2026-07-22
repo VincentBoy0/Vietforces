@@ -39,10 +39,10 @@
 
 ### Leaderboard (Real-time)
 
-- [ ] **LEAD-01**: Leaderboard screen hiển thị top 50 players (global) với ELO score real-time qua Supabase Realtime subscription
-- [ ] **LEAD-02**: User thấy vị trí của bản thân trong leaderboard ngay cả khi không thuộc top 50
-- [ ] **LEAD-03**: Leaderboard có tab "Tuần này" và "All-time" (filter server-side)
-- [ ] **LEAD-04**: Leaderboard subscription được lifecycle-aware (cancel trong `onCleared()` của ViewModel)
+- [x] **LEAD-01**: Leaderboard screen hiển thị top 50 players (global) với ELO score real-time qua Supabase Realtime subscription
+- [x] **LEAD-02**: User thấy vị trí của bản thân trong leaderboard ngay cả khi không thuộc top 50
+- [x] **LEAD-03**: Leaderboard có tab "Tuần này" và "All-time" (filter server-side)
+- [x] **LEAD-04**: Leaderboard subscription được lifecycle-aware (cancel trong `onCleared()` của ViewModel)
 
 ### Daily Challenge
 
@@ -155,10 +155,10 @@ Deferred to future release.
 | STREAK-04 | Phase 3 — Streak + Leaderboard | Pending |
 | ELO-01 | Phase 3 — Streak + Leaderboard | Pending |
 | ELO-02 | Phase 3 — Streak + Leaderboard | Pending |
-| LEAD-01 | Phase 3 — Streak + Leaderboard | Pending |
-| LEAD-02 | Phase 3 — Streak + Leaderboard | Pending |
-| LEAD-03 | Phase 3 — Streak + Leaderboard | Pending |
-| LEAD-04 | Phase 3 — Streak + Leaderboard | Pending |
+| LEAD-01 | Phase 3 — Streak + Leaderboard | Complete |
+| LEAD-02 | Phase 3 — Streak + Leaderboard | Complete |
+| LEAD-03 | Phase 3 — Streak + Leaderboard | Complete |
+| LEAD-04 | Phase 3 — Streak + Leaderboard | Complete |
 | DAILY-01 | Phase 4 — Daily Challenge + Notifications | Pending |
 | DAILY-02 | Phase 4 — Daily Challenge + Notifications | Pending |
 | DAILY-03 | Phase 4 — Daily Challenge + Notifications | Pending |

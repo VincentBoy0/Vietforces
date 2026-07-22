@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-last_updated: "2026-07-22T18:13:11.290Z"
+last_updated: "2026-07-22T18:40:08.502Z"
 progress:
   total_phases: 8
-  completed_phases: 2
-  total_plans: 10
-  completed_plans: 9
-  percent: 25
+  completed_phases: 3
+  total_plans: 14
+  completed_plans: 12
+  percent: 38
 ---
 
 # STATE — VietForces
