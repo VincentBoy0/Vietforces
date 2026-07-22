@@ -25,6 +25,10 @@ sealed class Screen(val route: String) {
     object FillBlank : Screen("game/fill_blank")
     object WordChain : Screen("game/word_chain")
 
+    // Auth screens
+    object Login : Screen("auth/login")
+    object Register : Screen("auth/register")
+
     companion object {
         fun getGameRoute(gameModeId: String): String = "game/$gameModeId"
     }

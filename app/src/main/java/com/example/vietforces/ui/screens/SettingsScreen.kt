@@ -1,5 +1,6 @@
 package com.example.vietforces.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -9,6 +10,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.vietforces.ui.viewmodel.AuthViewModel
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,7 +31,9 @@ import com.example.vietforces.ui.theme.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
+    onLogout: () -> Unit = {},
+    viewModel: AuthViewModel = hiltViewModel()
 ) {
     val scrollState = rememberScrollState()
 
@@ -126,6 +131,45 @@ fun SettingsScreen(
 
             // App Info
             AppInfoCard()
+
+            // Account Card with Sign Out
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp)
+                ) {
+                    Text(
+                        text = "👤 Tài khoản",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = TextPrimary
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    OutlinedButton(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = {
+                            viewModel.signOut()
+                            onLogout()
+                        },
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = VietRed),
+                        border = BorderStroke(1.dp, VietRed)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ExitToApp,
+                            contentDescription = "Đăng xuất",
+                            tint = VietRed
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Đăng xuất", color = VietRed)
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
         }

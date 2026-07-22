@@ -1,11 +1,16 @@
 package com.example.vietforces
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
+import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.auth.handleDeeplinks
+import javax.inject.Inject
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -13,6 +18,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -24,6 +31,7 @@ import com.example.vietforces.data.manager.ProfileManager
 import com.example.vietforces.data.manager.SettingsManager
 import com.example.vietforces.data.manager.UserProgressManager
 import com.example.vietforces.data.model.GameMode
+import com.example.vietforces.data.repository.AuthState
 import com.example.vietforces.data.storage.PreferencesManager
 import com.example.vietforces.navigation.Screen
 import com.example.vietforces.ui.components.DraggableMascot
@@ -37,9 +45,15 @@ import com.example.vietforces.ui.screens.game.WordChainScreen
 import com.example.vietforces.ui.screens.game.WordSearchScreen
 import com.example.vietforces.ui.screens.game.SyllableMatchScreen
 import com.example.vietforces.ui.theme.VietforcesTheme
+import com.example.vietforces.ui.viewmodel.AuthViewModel
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var supabase: SupabaseClient
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -53,11 +67,21 @@ class MainActivity : ComponentActivity() {
         AiManager.loadFromPreferences()
 
         enableEdgeToEdge()
+
+        // Handle deep links for Google OAuth callback
+        lifecycleScope.launch { supabase.handleDeeplinks(intent) }
+
         setContent {
             VietforcesTheme {
                 VietforcesApp()
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        lifecycleScope.launch { supabase.handleDeeplinks(intent) }
     }
 }
 
@@ -67,6 +91,20 @@ fun VietforcesApp() {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Main.route
     val context = LocalContext.current
+
+    val authViewModel: AuthViewModel = hiltViewModel()
+    val authState by authViewModel.authState.collectAsStateWithLifecycle()
+
+    // If user is authenticated and currently on an auth screen, navigate to Main
+    LaunchedEffect(authState, currentRoute) {
+        if (authState is AuthState.Authenticated &&
+            currentRoute in listOf(Screen.Login.route, Screen.Register.route)
+        ) {
+            navController.navigate(Screen.Main.route) {
+                popUpTo(0) { inclusive = true }
+            }
+        }
+    }
 
     // Determine if we should show bottom navigation
     val showBottomNav = currentRoute in listOf(
@@ -173,7 +211,13 @@ fun VietforcesApp() {
 
             // Settings Screen
             composable(Screen.Settings.route) {
-                SettingsScreen()
+                SettingsScreen(
+                    onLogout = {
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
+                )
             }
 
             // Performance Screen
@@ -286,6 +330,34 @@ fun VietforcesApp() {
             composable(Screen.SyllableMatch.route) {
                 SyllableMatchScreen(
                     onBackClick = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+
+            // Auth: Login
+            composable(Screen.Login.route) {
+                LoginScreen(
+                    onLoginSuccess = {
+                        navController.navigate(Screen.Main.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    },
+                    onNavigateToRegister = {
+                        navController.navigate(Screen.Register.route)
+                    }
+                )
+            }
+
+            // Auth: Register
+            composable(Screen.Register.route) {
+                RegisterScreen(
+                    onRegisterSuccess = {
+                        navController.navigate(Screen.Main.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    },
+                    onNavigateToLogin = {
                         navController.popBackStack()
                     }
                 )
