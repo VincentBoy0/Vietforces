@@ -27,7 +27,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.vietforces"
+        applicationId = "com.vietforces.app"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
