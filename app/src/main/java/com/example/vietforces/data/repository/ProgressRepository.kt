@@ -1,6 +1,8 @@
 package com.example.vietforces.data.repository
 
+import com.example.vietforces.data.manager.NotificationManager
 import com.example.vietforces.data.manager.UserProgressManager
+import com.example.vietforces.data.model.EloRankUtils
 import com.example.vietforces.data.model.UserProgressDto
 import com.example.vietforces.data.remote.RemoteProgressSource
 import com.example.vietforces.data.storage.PreferencesManager
@@ -21,6 +23,19 @@ import javax.inject.Singleton
  * game completion for immediate SYNC-01 coverage.
  * The onResume foreground sync in MainActivity is the guaranteed fallback.
  */
+
+/**
+ * Combined result of a completed game session's server-side updates.
+ * Both fields are null when the user is not authenticated or the call failed.
+ *
+ * ELO-01 / ELO-02: [eloResult] carries newElo and rankTier from the server.
+ * STREAK-01 / STREAK-03: [streakResult] carries streakCount and wasFreezeUsed.
+ */
+data class PostGameResult(
+    val eloResult: EloResult?,
+    val streakResult: StreakResult?
+)
+
 @Singleton
 class ProgressRepository @Inject constructor(
     private val remoteSource: RemoteProgressSource,
@@ -120,5 +135,51 @@ class ProgressRepository @Inject constructor(
     suspend fun syncIfLoggedIn(): Result<Unit> {
         if (authRepository.currentUserId == null) return Result.success(Unit)
         return syncToCloud()
+    }
+
+    /**
+     * Single post-game entry point called from game screens after each session ends.
+     *
+     * Chains:
+     * 1. EloRepository.calculateElo()  → server-side ELO update (ELO-01)
+     * 2. StreakRepository.updateStreak() → server-side streak update (STREAK-01)
+     * 3. Local state sync (ELO + streak reflected in UserProgressManager)
+     * 4. ELO-02: NotificationManager.checkEloMilestone() with server-returned ELO
+     * 5. syncToCloud() to persist all other progress fields (fire-and-forget)
+     *
+     * Returns [PostGameResult] with nullable fields — null means unauthenticated or failed.
+     */
+    suspend fun postGame(correct: Int, total: Int, timeMs: Long): PostGameResult {
+        if (authRepository.currentUserId == null) return PostGameResult(null, null)
+
+        val eloResult = EloRepository.instance?.calculateElo(correct, total, timeMs)?.getOrNull()
+        val streakResult = StreakRepository.instance?.updateStreak()?.getOrNull()
+
+        // Update local ELO state + fire ELO-02 milestone notification
+        if (eloResult != null) {
+            val session = UserProgressManager.getUserSession()
+            session.eloRating = eloResult.newElo
+            PreferencesManager.saveUserSession(session)
+
+            // ELO-02: notify of milestones / rank-up using server-returned tier string
+            val vietnameseTier = EloRankUtils.getVietnameseRankName(eloResult.rankTier)
+            NotificationManager.checkEloMilestone(eloResult.newElo, vietnameseTier)
+        }
+
+        // Update local streak state + fire streak milestone notification
+        if (streakResult != null) {
+            val session = UserProgressManager.getUserSession()
+            session.currentStreak = streakResult.streakCount
+            if (streakResult.streakCount > session.longestStreak) {
+                session.longestStreak = streakResult.streakCount
+            }
+            PreferencesManager.saveUserSession(session)
+            NotificationManager.addStreakNotification(streakResult.streakCount)
+        }
+
+        // Persist remaining progress fields (words learned, lastPracticed, etc.) — ignore errors
+        runCatching { syncToCloud() }
+
+        return PostGameResult(eloResult, streakResult)
     }
 }

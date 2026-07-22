@@ -29,6 +29,7 @@ import com.example.vietforces.data.manager.UserProgressManager
 import com.example.vietforces.data.model.AiCallResult
 import com.example.vietforces.data.model.DifficultyMode
 import com.example.vietforces.data.model.VocabularyItem
+import com.example.vietforces.data.repository.ProgressRepository
 import com.example.vietforces.data.repository.VocabularyRepository
 import com.example.vietforces.ui.components.MascotFeedbackManager
 import com.example.vietforces.ui.theme.*
@@ -64,6 +65,8 @@ fun ImageToWordScreen(
     var gameState by remember { mutableStateOf(ImageToWordGameState()) }
     var showGameOver by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+    // Track session start time for postGame elapsed-time metric (ELO-01)
+    val startTimeMs = remember { System.currentTimeMillis() }
 
     // Show difficulty selection first
     if (difficultyMode == null) {
@@ -161,6 +164,15 @@ fun ImageToWordScreen(
                         wrong = gameState.totalQuestions - gameState.score,
                         score = gameState.score
                     )
+                    // Post-game server sync: ELO + streak update (ELO-01, STREAK-01)
+                    val elapsedMs = System.currentTimeMillis() - startTimeMs
+                    scope.launch {
+                        ProgressRepository.instance?.postGame(
+                            correct = gameState.score,
+                            total = gameState.totalQuestions,
+                            timeMs = elapsedMs
+                        )
+                    }
                     showGameOver = true
                 } else {
                     gameState = nextQuestion(gameState)
