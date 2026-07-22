@@ -65,6 +65,13 @@ object PreferencesManager {
     // Key prefix for saved roleplay conversations (one entry per scenario id).
     private const val KEY_ROLEPLAY_PREFIX = "roleplay_session_"
 
+    // Keys for Onboarding / Guest mode
+    private const val KEY_ONBOARDING_COMPLETED = "onboarding_completed"
+    private const val KEY_IS_GUEST = "is_guest"
+    private const val KEY_SELECTED_LEVEL = "selected_level"
+    private const val KEY_DAILY_GOAL = "daily_goal"
+    private const val KEY_GUEST_PROMPT_SHOWN = "guest_game_prompt_shown"
+
     private var prefs: SharedPreferences? = null
 
     /**
@@ -114,6 +121,38 @@ object PreferencesManager {
     fun getAiMascotEnabled(): Boolean {
         return getPrefs().getBoolean(KEY_AI_MASCOT_ENABLED, true)
     }
+
+    // ==================== ONBOARDING / GUEST ====================
+
+    fun setOnboardingCompleted(completed: Boolean) {
+        getPrefs().edit().putBoolean(KEY_ONBOARDING_COMPLETED, completed).apply()
+    }
+
+    fun getOnboardingCompleted(): Boolean = getPrefs().getBoolean(KEY_ONBOARDING_COMPLETED, false)
+
+    fun setIsGuest(guest: Boolean) {
+        getPrefs().edit().putBoolean(KEY_IS_GUEST, guest).apply()
+    }
+
+    fun getIsGuest(): Boolean = getPrefs().getBoolean(KEY_IS_GUEST, false)
+
+    fun setSelectedLevel(level: String) {
+        getPrefs().edit().putString(KEY_SELECTED_LEVEL, level).apply()
+    }
+
+    fun getSelectedLevel(): String = getPrefs().getString(KEY_SELECTED_LEVEL, "beginner") ?: "beginner"
+
+    fun setDailyGoal(goal: Int) {
+        getPrefs().edit().putInt(KEY_DAILY_GOAL, goal).apply()
+    }
+
+    fun getDailyGoal(): Int = getPrefs().getInt(KEY_DAILY_GOAL, 10)
+
+    fun setGuestPromptShown(shown: Boolean) {
+        getPrefs().edit().putBoolean(KEY_GUEST_PROMPT_SHOWN, shown).apply()
+    }
+
+    fun getGuestPromptShown(): Boolean = getPrefs().getBoolean(KEY_GUEST_PROMPT_SHOWN, false)
 
     // ==================== ROLEPLAY SESSIONS ====================
 
