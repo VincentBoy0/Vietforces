@@ -607,7 +607,7 @@ private data class HeatmapDayData(
 private fun generateWeeksData(dailyPracticeHistory: Map<String, Int>): List<List<HeatmapDayData>> {
     val weeks = mutableListOf<List<HeatmapDayData>>()
     val calendar = Calendar.getInstance()
-    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.ROOT)
     val today = Calendar.getInstance()
 
     // Get current day of week (1 = Sunday, 2 = Monday, ..., 7 = Saturday)

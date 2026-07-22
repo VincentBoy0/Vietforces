@@ -193,7 +193,7 @@ object NotificationManager {
             diff < 86400_000 -> "${diff / 3600_000} giờ trước"
             diff < 604800_000 -> "${diff / 86400_000} ngày trước"
             else -> {
-                val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.ROOT)
                 sdf.format(Date(timestamp))
             }
         }
