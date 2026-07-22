@@ -46,10 +46,10 @@
 
 ### Daily Challenge
 
-- [ ] **DAILY-01**: Mỗi ngày có 1 daily challenge mới (server-generated bởi pg_cron Edge Function lúc 00:00 UTC)
-- [ ] **DAILY-02**: Daily challenge screen có countdown đến khi challenge kết thúc (midnight UTC)
-- [ ] **DAILY-03**: Hoàn thành daily challenge tặng bonus ELO (+50) và credit 1 ngày streak dù chưa chơi game mode khác
-- [ ] **DAILY-04**: User thấy history 7 ngày gần nhất của daily challenges (completed/missed/upcoming)
+- [x] **DAILY-01**: Mỗi ngày có 1 daily challenge mới (server-generated bởi pg_cron Edge Function lúc 00:00 UTC)
+- [x] **DAILY-02**: Daily challenge screen có countdown đến khi challenge kết thúc (midnight UTC)
+- [x] **DAILY-03**: Hoàn thành daily challenge tặng bonus ELO (+50) và credit 1 ngày streak dù chưa chơi game mode khác
+- [x] **DAILY-04**: User thấy history 7 ngày gần nhất của daily challenges (completed/missed/upcoming)
 
 ### Push Notifications
 
@@ -159,10 +159,10 @@ Deferred to future release.
 | LEAD-02 | Phase 3 — Streak + Leaderboard | Complete |
 | LEAD-03 | Phase 3 — Streak + Leaderboard | Complete |
 | LEAD-04 | Phase 3 — Streak + Leaderboard | Complete |
-| DAILY-01 | Phase 4 — Daily Challenge + Notifications | Pending |
-| DAILY-02 | Phase 4 — Daily Challenge + Notifications | Pending |
-| DAILY-03 | Phase 4 — Daily Challenge + Notifications | Pending |
-| DAILY-04 | Phase 4 — Daily Challenge + Notifications | Pending |
+| DAILY-01 | Phase 4 — Daily Challenge + Notifications | Complete |
+| DAILY-02 | Phase 4 — Daily Challenge + Notifications | Complete |
+| DAILY-03 | Phase 4 — Daily Challenge + Notifications | Complete |
+| DAILY-04 | Phase 4 — Daily Challenge + Notifications | Complete |
 | NOTIF-01 | Phase 4 — Daily Challenge + Notifications | Pending |
 | NOTIF-02 | Phase 4 — Daily Challenge + Notifications | Pending |
 | NOTIF-03 | Phase 4 — Daily Challenge + Notifications | Pending |

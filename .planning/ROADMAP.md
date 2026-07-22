@@ -16,7 +16,7 @@
 - [x] **Phase 1: Supabase Foundation** — Database schema, auth client, DI, and OpenAI key security ✓
 - [x] **Phase 2: Auth + Onboarding + Progress Sync + UX Polish** — Complete user accounts, guest-first onboarding, cloud sync, and baseline Android UX quality ✓
 - [x] **Phase 3: Streak + Real-time Leaderboard** — Server-authoritative ELO + Supabase Realtime leaderboard + streak mechanics
-- [ ] **Phase 4: Daily Challenge + Push Notifications** — Daily habit loop (server-generated challenge) + FCM re-engagement notifications
+- [x] **Phase 4: Daily Challenge + Push Notifications** — Daily habit loop (server-generated challenge) + FCM re-engagement notifications (completed 2026-07-22)
 - [ ] **Phase 5: Social / Friends** — Follow system, friends leaderboard tab, and activity feed
 - [ ] **Phase 6: Web Admin Dashboard** — Next.js 15 admin app for vocabulary CRUD, user management, analytics, and challenge scheduling
 - [ ] **Phase 7: Landing Page** — Next.js marketing page deployed to Vercel
@@ -187,7 +187,7 @@ Plans:
 | 1. Supabase Foundation | 4/4 | Not started | - |
 | 2. Auth + Onboarding + Sync + UX | 3/4 | In Progress|  |
 | 3. Streak + Leaderboard | 2/4 | In Progress|  |
-| 4. Daily Challenge + Notifications | 0/? | Not started | - |
+| 4. Daily Challenge + Notifications | 3/3 | Complete   | 2026-07-22 |
 | 5. Social / Friends | 0/? | Not started | - |
 | 6. Web Admin Dashboard | 0/? | Not started | - |
 | 7. Landing Page | 0/? | Not started | - |
