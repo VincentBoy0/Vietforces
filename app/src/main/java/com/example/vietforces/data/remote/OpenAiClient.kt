@@ -14,23 +14,24 @@ import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 /**
- * Low-level client for the OpenAI Chat Completions API (gpt-4o-mini).
+ * Routes all chat completion requests through the Supabase Edge Function
+ * openai-proxy. The OpenAI key lives only in Supabase secrets — not in the APK.
  *
  *  - [completeJson] asks the model for a single JSON object (used for grading,
  *    mascot reactions and the learning path).
  *  - [completeChat] is a free-form multi-turn variant used by the roleplay
  *    tutor, returning the assistant's plain-text reply.
  *
- * The API key is injected at build time from local.properties via BuildConfig.
- * NOTE: embedding the key is fine for a demo/coursework build, but such an APK
- * must never be published. For production, move calls behind a server proxy.
+ * Authorization uses the Supabase anon key. The proxy attaches the real
+ * OPENAI_API_KEY server-side before forwarding to api.openai.com.
  */
 object OpenAiClient {
 
-    private const val ENDPOINT = "https://api.openai.com/v1/chat/completions"
+    private val ENDPOINT: String
+        get() = "${BuildConfig.SUPABASE_URL}/functions/v1/openai-proxy"
     private val JSON_MEDIA = "application/json; charset=utf-8".toMediaType()
 
-    private val apiKey: String get() = BuildConfig.OPENAI_API_KEY
+    private val anonKey: String get() = BuildConfig.SUPABASE_ANON_KEY
     private val model: String get() = BuildConfig.OPENAI_MODEL
 
     private val client: OkHttpClient by lazy {
@@ -40,11 +41,11 @@ object OpenAiClient {
             .build()
     }
 
-    /** True when an API key was provided at build time. */
-    fun isConfigured(): Boolean = apiKey.isNotBlank()
+    /** True when the Supabase URL is configured (proxy is reachable). */
+    fun isConfigured(): Boolean = BuildConfig.SUPABASE_URL.isNotBlank()
 
-    /** Thrown when the key is missing so callers can show a config hint. */
-    class NotConfiguredException : IOException("OpenAI API key chưa được cấu hình")
+    /** Thrown when the Supabase URL is missing so callers can show a config hint. */
+    class NotConfiguredException : IOException("Supabase URL chưa được cấu hình — kiểm tra local.properties")
 
     /**
      * Send a system + user prompt and return the assistant content as a JSON
@@ -122,7 +123,8 @@ object OpenAiClient {
 
         val request = Request.Builder()
             .url(ENDPOINT)
-            .addHeader("Authorization", "Bearer $apiKey")
+            .addHeader("Authorization", "Bearer $anonKey")
+            .addHeader("apikey", anonKey)
             .addHeader("Content-Type", "application/json")
             .post(payload.toString().toRequestBody(JSON_MEDIA))
             .build()
