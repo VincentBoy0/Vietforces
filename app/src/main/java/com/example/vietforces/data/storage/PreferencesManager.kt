@@ -72,6 +72,9 @@ object PreferencesManager {
     private const val KEY_DAILY_GOAL = "daily_goal"
     private const val KEY_GUEST_PROMPT_SHOWN = "guest_game_prompt_shown"
 
+    // Key for one-time guest → cloud migration (ONBOARD-03)
+    private const val KEY_MIGRATION_COMPLETED = "migration_completed"
+
     private var prefs: SharedPreferences? = null
 
     /**
@@ -153,6 +156,18 @@ object PreferencesManager {
     }
 
     fun getGuestPromptShown(): Boolean = getPrefs().getBoolean(KEY_GUEST_PROMPT_SHOWN, false)
+
+    // ==================== MIGRATION FLAG ====================
+
+    /**
+     * Marks the one-time guest→cloud migration as completed (ONBOARD-03).
+     * After this returns true, [MigrationService.migrateIfNeeded] becomes a no-op.
+     */
+    fun setMigrationCompleted(done: Boolean) {
+        getPrefs().edit().putBoolean(KEY_MIGRATION_COMPLETED, done).apply()
+    }
+
+    fun getMigrationCompleted(): Boolean = getPrefs().getBoolean(KEY_MIGRATION_COMPLETED, false)
 
     // ==================== ROLEPLAY SESSIONS ====================
 

@@ -32,6 +32,8 @@ import com.example.vietforces.data.manager.SettingsManager
 import com.example.vietforces.data.manager.UserProgressManager
 import com.example.vietforces.data.model.GameMode
 import com.example.vietforces.data.repository.AuthState
+import com.example.vietforces.data.repository.ProgressRepository
+import com.example.vietforces.data.service.MigrationService
 import com.example.vietforces.data.storage.PreferencesManager
 import com.example.vietforces.navigation.Screen
 import com.example.vietforces.ui.components.DraggableMascot
@@ -54,6 +56,12 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var supabase: SupabaseClient
 
+    @Inject
+    lateinit var progressRepository: ProgressRepository
+
+    @Inject
+    lateinit var migrationService: MigrationService
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -73,7 +81,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             VietforcesTheme {
-                VietforcesApp()
+                VietforcesApp(migrationService = migrationService)
             }
         }
     }
@@ -83,10 +91,22 @@ class MainActivity : ComponentActivity() {
         setIntent(intent)
         lifecycleScope.launch { supabase.handleDeeplinks(intent) }
     }
+
+    /**
+     * SYNC-01 + SYNC-02: On every foreground resume, pull cloud progress (if newer) then push local.
+     * Both are silent no-ops when the user is not logged in.
+     */
+    override fun onResume() {
+        super.onResume()
+        lifecycleScope.launch {
+            progressRepository.loadFromCloud()   // SYNC-02: overwrite local if cloud is newer
+            progressRepository.syncIfLoggedIn()  // SYNC-01: push local state up
+        }
+    }
 }
 
 @Composable
-fun VietforcesApp() {
+fun VietforcesApp(migrationService: MigrationService) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Main.route
@@ -107,6 +127,15 @@ fun VietforcesApp() {
             navController.navigate(Screen.Main.route) {
                 popUpTo(0) { inclusive = true }
             }
+        }
+    }
+
+    // ONBOARD-03: On first login, migrate local guest progress to the cloud once.
+    // rememberCoroutineScope ties the coroutine lifetime to this composable.
+    val coroutineScope = rememberCoroutineScope()
+    LaunchedEffect(authState) {
+        if (authState is AuthState.Authenticated) {
+            coroutineScope.launch { migrationService.migrateIfNeeded() }
         }
     }
 
