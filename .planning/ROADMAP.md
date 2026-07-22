@@ -12,7 +12,7 @@
 
 ## Phases
 
-- [ ] **Phase 0: Pre-work Fixes** — Resolve two blocking bugs before any Supabase code is written
+- [x] **Phase 0: Pre-work Fixes** — Resolve two blocking bugs before any Supabase code is written ✓
 - [ ] **Phase 1: Supabase Foundation** — Database schema, auth client, DI, and OpenAI key security
 - [ ] **Phase 2: Auth + Onboarding + Progress Sync + UX Polish** — Complete user accounts, guest-first onboarding, cloud sync, and baseline Android UX quality
 - [ ] **Phase 3: Streak + Real-time Leaderboard** — Server-authoritative ELO + Supabase Realtime leaderboard + streak mechanics
@@ -34,7 +34,7 @@
   1. `SimpleDateFormat` and all date/time formatting throughout the codebase use `Locale.ROOT` — verified by grepping for `Locale.getDefault()` returning zero hits in date-related files
   2. `applicationId` in `build.gradle.kts` is no longer `com.example.vietforces`; the new ID matches the intended Play Store / FCM package
   3. App builds, installs, and all existing game modes run without regression after both changes
-**Plans**: TBD
+**Plans**: 00-01-PLAN.md ✓, 00-02-PLAN.md ✓
 
 ---
 
@@ -48,7 +48,7 @@
   2. An AI feature call (roleplay / writing practice) routes through the Supabase Edge Function proxy — the OpenAI key is absent from the built APK (`strings.xml` and `BuildConfig` contain no `OPENAI_API_KEY` value)
   3. `SupabaseClient` can be injected into any Repository via `@Inject` constructor — confirmed by a smoke-test Repository that resolves without a crash in a Hilt component
   4. A keepalive mechanism (GitHub Actions cron or equivalent) is in place and confirmed to prevent the Supabase project from pausing
-**Plans**: TBD
+**Plans**: 00-01-PLAN.md ✓, 00-02-PLAN.md ✓
 
 ---
 
@@ -63,7 +63,7 @@
   3. A returning user can log in (email or Google), and their progress (ELO, streak, words seen) is loaded from Supabase within the same session — and persists across app restarts
   4. A logged-in user can log out from Settings, and can reset a forgotten password via an email link
   5. Every screen with network data shows a skeleton/shimmer loader instead of a blank white view; every error state has a visible retry button; every empty state has an illustration and a CTA
-**Plans**: TBD
+**Plans**: 00-01-PLAN.md ✓, 00-02-PLAN.md ✓
 **UI hint**: yes
 
 ---
@@ -80,7 +80,7 @@
   4. The Leaderboard screen shows top 50 global players with ELO scores that update in real time (via Supabase Realtime); the current user's rank is visible even when outside top 50
   5. Leaderboard has "This Week" and "All-time" tabs that filter correctly; the Realtime subscription is cleaned up when the user navigates away (no channel leak)
   6. A user's displayed ELO tier badge (Bronze / Silver / Gold / Platinum / Diamond) reflects their server-side ELO — the client cannot manipulate the score
-**Plans**: TBD
+**Plans**: 00-01-PLAN.md ✓, 00-02-PLAN.md ✓
 **UI hint**: yes
 
 ---
@@ -96,7 +96,7 @@
   3. The challenge history panel shows the last 7 days with accurate completed / missed / upcoming states
   4. A logged-in user who has not practised today receives an FCM push notification ("Streak in danger!") at the configured time; tapping the notification opens the Daily Challenge screen directly
   5. Android 13+ users are shown the `POST_NOTIFICATIONS` runtime permission request at an appropriate moment (not on first launch); users who deny it do not see repeated prompts; notification preferences in Settings correctly enable/disable each notification type
-**Plans**: TBD
+**Plans**: 00-01-PLAN.md ✓, 00-02-PLAN.md ✓
 **UI hint**: yes
 
 ---
@@ -111,7 +111,7 @@
   2. The Leaderboard screen has a "Friends" tab that shows only the users the current user follows, ranked by ELO
   3. Tapping a friend's name opens their public profile (read-only) showing streak, ELO tier, and game stats
   4. An activity feed shows recent friend milestones (daily challenge completion, ELO tier change) — feed updates without requiring a manual refresh
-**Plans**: TBD
+**Plans**: 00-01-PLAN.md ✓, 00-02-PLAN.md ✓
 **UI hint**: yes
 
 ---
@@ -127,7 +127,7 @@
   3. An admin can view all registered users filtered by ELO / last active, soft-ban a user (they see a "banned" message on next login), and reset a user's ELO
   4. The analytics dashboard shows DAU for the last 30 days, top game modes by play count, and average session length as charts — data sourced from Supabase
   5. An admin can view the daily challenge schedule, create a manual challenge for a specific date, and override the auto-generated one — confirmed by the Android app loading the manually created challenge on that date
-**Plans**: TBD
+**Plans**: 00-01-PLAN.md ✓, 00-02-PLAN.md ✓
 **UI hint**: yes
 
 ---
@@ -143,7 +143,7 @@
   3. A features section presents at least 4 key capabilities (game modes, AI practice, leaderboard, daily challenge) with icons or illustrations
   4. A download CTA (Google Play badge or APK link) is visible on the hero and in a dedicated section; clicking it leads to a valid download destination
   5. A screenshots or demo section shows actual in-app screens or a video embed that plays correctly on both mobile and desktop
-**Plans**: TBD
+**Plans**: 00-01-PLAN.md ✓, 00-02-PLAN.md ✓
 **UI hint**: yes
 
 ---
@@ -152,7 +152,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 0. Pre-work Fixes | 0/? | Not started | - |
+| 0. Pre-work Fixes | 2/2 | **Complete** ✓ | 2026-07-22 |
 | 1. Supabase Foundation | 0/? | Not started | - |
 | 2. Auth + Onboarding + Sync + UX | 0/? | Not started | - |
 | 3. Streak + Leaderboard | 0/? | Not started | - |
@@ -167,8 +167,8 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PRE-01 | Phase 0 | Pending |
-| PRE-02 | Phase 0 | Pending |
+| PRE-01 | Phase 0 | ✓ Complete |
+| PRE-02 | Phase 0 | ✓ Complete |
 | FOUND-01 | Phase 1 | Pending |
 | FOUND-02 | Phase 1 | Pending |
 | FOUND-03 | Phase 1 | Pending |
