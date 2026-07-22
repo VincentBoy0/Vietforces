@@ -48,7 +48,13 @@
   2. An AI feature call (roleplay / writing practice) routes through the Supabase Edge Function proxy — the OpenAI key is absent from the built APK (`strings.xml` and `BuildConfig` contain no `OPENAI_API_KEY` value)
   3. `SupabaseClient` can be injected into any Repository via `@Inject` constructor — confirmed by a smoke-test Repository that resolves without a crash in a Hilt component
   4. A keepalive mechanism (GitHub Actions cron or equivalent) is in place and confirmed to prevent the Supabase project from pausing
-**Plans**: 00-01-PLAN.md ✓, 00-02-PLAN.md ✓
+**Plans:** 4 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Gradle deps + Hilt setup + SupabaseClient module
+- [ ] 01-02-PLAN.md — Supabase schema SQL migration (6 tables + RLS)
+- [ ] 01-03-PLAN.md — OpenAI proxy Edge Function + OpenAiClient update
+- [ ] 01-04-PLAN.md — Keepalive GitHub Actions workflow
 
 ---
 
@@ -153,7 +159,7 @@
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 0. Pre-work Fixes | 2/2 | **Complete** ✓ | 2026-07-22 |
-| 1. Supabase Foundation | 0/? | Not started | - |
+| 1. Supabase Foundation | 4/4 | Not started | - |
 | 2. Auth + Onboarding + Sync + UX | 0/? | Not started | - |
 | 3. Streak + Leaderboard | 0/? | Not started | - |
 | 4. Daily Challenge + Notifications | 0/? | Not started | - |
