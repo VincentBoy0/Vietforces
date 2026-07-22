@@ -5,6 +5,9 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 // Read the OpenAI API key from local.properties (which is git-ignored).
@@ -19,6 +22,8 @@ val openAiApiKey: String = localProperties.getProperty("OPENAI_API_KEY", "")
 // Optionally override the model in local.properties (e.g. OPENAI_MODEL=gpt-4o).
 // Defaults to gpt-4.1-mini: smarter than 4o-mini, still cheap, drop-in (same API).
 val openAiModel: String = localProperties.getProperty("OPENAI_MODEL", "gpt-4.1-mini")
+val supabaseUrl: String = localProperties.getProperty("SUPABASE_URL", "")
+val supabaseAnonKey: String = localProperties.getProperty("SUPABASE_ANON_KEY", "")
 
 android {
     namespace = "com.example.vietforces"
@@ -38,6 +43,8 @@ android {
         // Expose the API key + model to code via BuildConfig.
         buildConfigField("String", "OPENAI_API_KEY", "\"$openAiApiKey\"")
         buildConfigField("String", "OPENAI_MODEL", "\"$openAiModel\"")
+        buildConfigField("String", "SUPABASE_URL", "\"$supabaseUrl\"")
+        buildConfigField("String", "SUPABASE_ANON_KEY", "\"$supabaseAnonKey\"")
     }
 
     buildTypes {
@@ -75,6 +82,16 @@ dependencies {
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.okhttp)
     implementation(libs.kotlinx.coroutines.android)
+    implementation(platform(libs.supabase.bom))
+    implementation(libs.supabase.auth)
+    implementation(libs.supabase.postgrest)
+    implementation(libs.supabase.realtime)
+    implementation(libs.supabase.storage)
+    implementation(libs.ktor.client.okhttp)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    implementation(libs.hilt.navigation.compose)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
