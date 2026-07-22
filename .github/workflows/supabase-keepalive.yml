@@ -1,0 +1,31 @@
+# Pings the Supabase REST API daily to prevent the free-tier project from pausing
+# after 7 days of inactivity. Requires SUPABASE_URL and SUPABASE_ANON_KEY repository secrets.
+
+name: Supabase Keepalive
+
+on:
+  schedule:
+    # Run daily at noon UTC to prevent Supabase free-tier 7-day pause
+    - cron: '0 12 * * *'
+  workflow_dispatch: # Allow manual trigger from GitHub Actions UI for testing
+
+jobs:
+  keepalive:
+    name: Ping Supabase
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST API
+        run: |
+          curl \
+            --fail-with-body \
+            --silent \
+            --show-error \
+            --max-time 30 \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Accept: application/json" \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/"
+
+      - name: Log result
+        if: success()
+        run: echo "Supabase keepalive ping successful at $(date -u)"
