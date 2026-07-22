@@ -13,7 +13,7 @@
 ## Phases
 
 - [x] **Phase 0: Pre-work Fixes** — Resolve two blocking bugs before any Supabase code is written ✓
-- [ ] **Phase 1: Supabase Foundation** — Database schema, auth client, DI, and OpenAI key security
+- [x] **Phase 1: Supabase Foundation** — Database schema, auth client, DI, and OpenAI key security ✓
 - [ ] **Phase 2: Auth + Onboarding + Progress Sync + UX Polish** — Complete user accounts, guest-first onboarding, cloud sync, and baseline Android UX quality
 - [ ] **Phase 3: Streak + Real-time Leaderboard** — Server-authoritative ELO + Supabase Realtime leaderboard + streak mechanics
 - [ ] **Phase 4: Daily Challenge + Push Notifications** — Daily habit loop (server-generated challenge) + FCM re-engagement notifications
@@ -175,11 +175,11 @@ Plans:
 |-------------|-------|--------|
 | PRE-01 | Phase 0 | ✓ Complete |
 | PRE-02 | Phase 0 | ✓ Complete |
-| FOUND-01 | Phase 1 | Pending |
-| FOUND-02 | Phase 1 | Pending |
-| FOUND-03 | Phase 1 | Pending |
-| FOUND-04 | Phase 1 | Pending |
-| FOUND-05 | Phase 1 | Pending |
+| FOUND-01 | Phase 1 | ✓ Complete |
+| FOUND-02 | Phase 1 | ✓ Complete |
+| FOUND-03 | Phase 1 | ✓ Complete |
+| FOUND-04 | Phase 1 | ✓ Complete |
+| FOUND-05 | Phase 1 | ✓ Complete |
 | AUTH-01 | Phase 2 | Pending |
 | AUTH-02 | Phase 2 | Pending |
 | AUTH-03 | Phase 2 | Pending |
