@@ -32,6 +32,7 @@ import kotlinx.coroutines.delay
 fun MainScreen(
     onProfileClick: () -> Unit,
     onNotificationClick: () -> Unit,
+    onDailyChallengeClick: () -> Unit = {},
     onWritingPracticeClick: () -> Unit = {},
     onLearningPathClick: () -> Unit = {},
     onRoleplayClick: () -> Unit = {},
@@ -133,6 +134,11 @@ fun MainScreen(
             // AI Learning Path banner
             item {
                 LearningPathBanner(onClick = onLearningPathClick)
+            }
+
+            // Daily Challenge card
+            item {
+                DailyChallengeCard(onClick = onDailyChallengeClick)
             }
 
 
@@ -237,6 +243,54 @@ private fun StatsCard(
                 value = elo.toString(),
                 label = "Điểm Elo",
                 backgroundColor = VietYellow.copy(alpha = 0.1f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun DailyChallengeCard(onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(VietRed.copy(alpha = 0.12f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = "🎯", fontSize = 24.sp)
+            }
+            Spacer(modifier = Modifier.width(14.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Thử thách hôm nay 🎯",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = VietRed
+                )
+                Text(
+                    text = "Hoàn thành để nhận +50 ELO",
+                    fontSize = 12.sp,
+                    color = TextSecondary
+                )
+            }
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = null,
+                tint = VietRed
             )
         }
     }

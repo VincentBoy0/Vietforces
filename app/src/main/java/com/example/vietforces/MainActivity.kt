@@ -245,6 +245,9 @@ fun VietforcesApp(migrationService: MigrationService) {
                     onNotificationClick = {
                         navController.navigate(Screen.Notification.route)
                     },
+                    onDailyChallengeClick = {
+                        navController.navigate(Screen.DailyChallenge.route)
+                    },
                     onWritingPracticeClick = {
                         navController.navigate(Screen.WritingPractice.route)
                     },
@@ -456,7 +459,23 @@ fun VietforcesApp(migrationService: MigrationService) {
                     }
                 )
             }
+
+            // Daily Challenge — full-screen overlay (no bottom nav)
+            composable(Screen.DailyChallenge.route) {
+                DailyChallengeScreen(
+                    onBackClick = { navController.popBackStack() }
+                )
+            }
         }
+        }
+
+        // Handle FCM deep-link navigation once NavController is ready (NOTIF-04)
+        LaunchedEffect(Unit) {
+            val dest = MainActivity.pendingNavigationDestination
+            if (dest == "daily_challenge") {
+                MainActivity.pendingNavigationDestination = null
+                navController.navigate(Screen.DailyChallenge.route)
+            }
         }
 
         // Draggable Mascot - appears on all screens, on top of everything including bottom nav

@@ -33,6 +33,9 @@ sealed class Screen(val route: String) {
     // Onboarding
     object Onboarding : Screen("onboarding")
 
+    // Daily Challenge
+    object DailyChallenge : Screen("daily_challenge")
+
     companion object {
         fun getGameRoute(gameModeId: String): String = "game/$gameModeId"
     }
