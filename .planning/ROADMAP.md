@@ -15,7 +15,7 @@
 - [x] **Phase 0: Pre-work Fixes** — Resolve two blocking bugs before any Supabase code is written ✓
 - [x] **Phase 1: Supabase Foundation** — Database schema, auth client, DI, and OpenAI key security ✓
 - [x] **Phase 2: Auth + Onboarding + Progress Sync + UX Polish** — Complete user accounts, guest-first onboarding, cloud sync, and baseline Android UX quality ✓
-- [ ] **Phase 3: Streak + Real-time Leaderboard** — Server-authoritative ELO + Supabase Realtime leaderboard + streak mechanics
+- [x] **Phase 3: Streak + Real-time Leaderboard** — Server-authoritative ELO + Supabase Realtime leaderboard + streak mechanics
 - [ ] **Phase 4: Daily Challenge + Push Notifications** — Daily habit loop (server-generated challenge) + FCM re-engagement notifications
 - [ ] **Phase 5: Social / Friends** — Follow system, friends leaderboard tab, and activity feed
 - [ ] **Phase 6: Web Admin Dashboard** — Next.js 15 admin app for vocabulary CRUD, user management, analytics, and challenge scheduling
