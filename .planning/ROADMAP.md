@@ -17,7 +17,7 @@
 - [x] **Phase 2: Auth + Onboarding + Progress Sync + UX Polish** — Complete user accounts, guest-first onboarding, cloud sync, and baseline Android UX quality ✓
 - [x] **Phase 3: Streak + Real-time Leaderboard** — Server-authoritative ELO + Supabase Realtime leaderboard + streak mechanics
 - [x] **Phase 4: Daily Challenge + Push Notifications** — Daily habit loop (server-generated challenge) + FCM re-engagement notifications (completed 2026-07-22)
-- [ ] **Phase 5: Social / Friends** — Follow system, friends leaderboard tab, and activity feed
+- [x] **Phase 5: Social / Friends** — Follow system, friends leaderboard tab, and activity feed
 - [ ] **Phase 6: Web Admin Dashboard** — Next.js 15 admin app for vocabulary CRUD, user management, analytics, and challenge scheduling
 - [ ] **Phase 7: Landing Page** — Next.js marketing page deployed to Vercel
 
