@@ -25,7 +25,9 @@ import com.example.vietforces.data.manager.ProfileManager
 import com.example.vietforces.data.manager.UserProgressManager
 import com.example.vietforces.data.model.EloRank
 import com.example.vietforces.data.model.EloRankUtils
+import com.example.vietforces.data.repository.StreakRepository
 import com.example.vietforces.data.storage.PreferencesManager
+import com.example.vietforces.ui.components.StreakHeatmapComposable
 import com.example.vietforces.ui.theme.*
 
 /**
@@ -95,6 +97,16 @@ fun ProfileScreen(
     val eloRating = UserProgressManager.getEloRating()
     val currentRank = EloRankUtils.getCurrentRank(eloRating)
     val userSession = UserProgressManager.getUserSession()
+
+    // STREAK-04: Load last 28 days of practice history for the heatmap.
+    val practicedDates by produceState<Set<String>>(initialValue = emptySet()) {
+        value = StreakRepository.instance
+            ?.getStreakHistory(28)
+            ?.getOrNull()
+            ?.map { it.practicedDate }
+            ?.toSet()
+            ?: emptySet()
+    }
 
     Column(
         modifier = Modifier
@@ -202,6 +214,9 @@ fun ProfileScreen(
 
             // Statistics Card
             ProfileStatsCard(userSession = userSession)
+
+            // STREAK-04: 28-day heatmap below stats card
+            StreakHeatmapComposable(practicedDates = practicedDates)
 
             // Rank Progress Card
             RankProgressCard(
