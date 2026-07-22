@@ -6,6 +6,7 @@ package com.example.vietforces.navigation
 sealed class Screen(val route: String) {
     // Bottom navigation screens
     object Main : Screen("main")
+    object Leaderboard : Screen("leaderboard")
     object Settings : Screen("settings")
     object Profile : Screen("profile")
     object Performance : Screen("performance")

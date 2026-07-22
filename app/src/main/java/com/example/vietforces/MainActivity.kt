@@ -142,6 +142,7 @@ fun VietforcesApp(migrationService: MigrationService) {
     // Determine if we should show bottom navigation
     val showBottomNav = currentRoute in listOf(
         Screen.Main.route,
+        Screen.Leaderboard.route,
         Screen.Profile.route,
         Screen.Settings.route,
         Screen.Performance.route
@@ -271,6 +272,11 @@ fun VietforcesApp(migrationService: MigrationService) {
             // Performance Screen
             composable(Screen.Performance.route) {
                 PerformanceScreen()
+            }
+
+            // Leaderboard Screen
+            composable(Screen.Leaderboard.route) {
+                LeaderboardScreen()
             }
 
             // Notification Screen

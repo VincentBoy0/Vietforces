@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
+import androidx.compose.material.icons.outlined.EmojiEvents
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -29,6 +30,13 @@ sealed class BottomNavItem(
         unselectedIcon = Icons.Outlined.Home
     )
 
+    object Leaderboard : BottomNavItem(
+        route = Screen.Leaderboard.route,
+        title = "BXH",
+        selectedIcon = Icons.Filled.EmojiEvents,
+        unselectedIcon = Icons.Outlined.EmojiEvents
+    )
+
     object Performance : BottomNavItem(
         route = Screen.Performance.route,
         title = "Thành tích",
@@ -51,7 +59,7 @@ sealed class BottomNavItem(
     )
 
     companion object {
-        val items = listOf(Home, Performance, Profile, Settings)
+        val items = listOf(Home, Leaderboard, Performance, Profile, Settings)
     }
 }
 
