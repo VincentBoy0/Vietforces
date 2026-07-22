@@ -1,3 +1,17 @@
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: Not started
+last_updated: "2026-07-22T17:49:00.000Z"
+progress:
+  total_phases: 8
+  completed_phases: 2
+  total_plans: 10
+  completed_plans: 8
+  percent: 28
+---
+
 # STATE — VietForces
 
 **Project:** VietForces
@@ -20,9 +34,9 @@
 ## Current Position
 
 ```
-Phase:   0 — Pre-work Fixes
-Plan:    TBD (not yet planned)
-Status:  Not started
+Phase:   2 — Auth + Onboarding + Sync + UX
+Plan:    04 — UX Polish (COMPLETED)
+Status:  Phase 2 all plans complete
 ```
 
 **Progress bar:**
@@ -63,6 +77,9 @@ Status:  Not started
 
 | Decision | Rationale |
 |----------|-----------|
+| dynamicColor=false in VietforcesTheme | Material You overrides VietRed/VietYellow brand colors on Android 12+; setting false ensures brand identity on all API levels. |
+| ShimmerBox with InfiniteTransition only | No external shimmer library dependency; Compose animation APIs cover the use case cleanly with RepeatMode.Reverse. |
+| Hilt 2.60.1 → 2.51.1 | Hilt 2.60.1 requires AGP 9.0+; project uses AGP 8.13.2. Downgrade restores compatibility without breaking any used Hilt API surface. |
 | Phase 0 before Phase 1 | `Locale.getDefault()` in `SimpleDateFormat` corrupts streak dates post-migration; `com.example` applicationId blocks FCM. Fix first, write no Supabase code before these are done. |
 | UX-01–05 bundled into Phase 2 | Empty/loading/error/dark-mode states are pre-requisites for Phase 2 screens going live; delivering them separately would create a broken interim state. |
 | Phase 6 (Admin) depends only on Phase 1 | Admin dashboard is an independent Next.js project; it only needs the Supabase schema. Can be parallelised with Android Phases 3-5. |
@@ -89,7 +106,7 @@ Status:  Not started
 
 ### Technology Notes
 
-- **Android:** supabase-bom 3.7.0, ktor-client-okhttp 3.5.1, hilt-android 2.60.1, KSP (not kapt)
+- **Android:** supabase-bom 3.7.0, ktor-client-okhttp 3.5.1, hilt-android 2.51.1 (downgraded from 2.60.1 — AGP 8.13.2 compat), KSP (not kapt)
 - **Web:** Next.js 15.3.9, @supabase/ssr 0.12.3 (NOT deprecated auth-helpers-nextjs), Tailwind v4
 - **Supabase Realtime:** lifecycle-aware in ViewModel — subscribe in `init{}`, unsubscribe in `onCleared()`
 - **Admin API routes:** Middleware alone is insufficient — every `/api/admin/*` handler must re-verify JWT
@@ -107,9 +124,10 @@ Status:  Not started
 
 **How to resume:** Run `/gsd-plan-phase 0` to generate the execution plan for Phase 0 (Pre-work Fixes).
 
-**Last agent action:** ROADMAP.md and STATE.md created by roadmapper agent. REQUIREMENTS.md traceability section updated.
+**Last agent action:** Phase 2 Plan 04 completed — UX Polish (EmptyState/Shimmer/Error composables + dark mode theming). Commit 8dd49b9. Hilt downgraded 2.60.1→2.51.1 for AGP 8.13.2 compatibility.
 
 **Files on disk:**
+
 - `.planning/PROJECT.md` — project brief and constraints
 - `.planning/REQUIREMENTS.md` — all 58 v1 requirements with phase assignments
 - `.planning/ROADMAP.md` — 8-phase roadmap with success criteria
