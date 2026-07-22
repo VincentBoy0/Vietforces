@@ -18,7 +18,7 @@
 - [x] **Phase 3: Streak + Real-time Leaderboard** — Server-authoritative ELO + Supabase Realtime leaderboard + streak mechanics
 - [x] **Phase 4: Daily Challenge + Push Notifications** — Daily habit loop (server-generated challenge) + FCM re-engagement notifications (completed 2026-07-22)
 - [x] **Phase 5: Social / Friends** — Follow system, friends leaderboard tab, and activity feed
-- [ ] **Phase 6: Web Admin Dashboard** — Next.js 15 admin app for vocabulary CRUD, user management, analytics, and challenge scheduling
+- [x] **Phase 6: Web Admin Dashboard** — Next.js 15 admin app for vocabulary CRUD, user management, analytics, and challenge scheduling
 - [ ] **Phase 7: Landing Page** — Next.js marketing page deployed to Vercel
 
 ---
