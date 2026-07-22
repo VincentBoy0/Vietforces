@@ -14,7 +14,7 @@
 
 - [x] **Phase 0: Pre-work Fixes** — Resolve two blocking bugs before any Supabase code is written ✓
 - [x] **Phase 1: Supabase Foundation** — Database schema, auth client, DI, and OpenAI key security ✓
-- [ ] **Phase 2: Auth + Onboarding + Progress Sync + UX Polish** — Complete user accounts, guest-first onboarding, cloud sync, and baseline Android UX quality
+- [x] **Phase 2: Auth + Onboarding + Progress Sync + UX Polish** — Complete user accounts, guest-first onboarding, cloud sync, and baseline Android UX quality ✓
 - [ ] **Phase 3: Streak + Real-time Leaderboard** — Server-authoritative ELO + Supabase Realtime leaderboard + streak mechanics
 - [ ] **Phase 4: Daily Challenge + Push Notifications** — Daily habit loop (server-generated challenge) + FCM re-engagement notifications
 - [ ] **Phase 5: Social / Friends** — Follow system, friends leaderboard tab, and activity feed
@@ -205,21 +205,21 @@ Plans:
 | FOUND-03 | Phase 1 | ✓ Complete |
 | FOUND-04 | Phase 1 | ✓ Complete |
 | FOUND-05 | Phase 1 | ✓ Complete |
-| AUTH-01 | Phase 2 | Pending |
-| AUTH-02 | Phase 2 | Pending |
-| AUTH-03 | Phase 2 | Pending |
-| AUTH-04 | Phase 2 | Pending |
-| AUTH-05 | Phase 2 | Pending |
-| ONBOARD-01 | Phase 2 | Pending |
-| ONBOARD-02 | Phase 2 | Pending |
-| ONBOARD-03 | Phase 2 | Pending |
-| SYNC-01 | Phase 2 | Pending |
-| SYNC-02 | Phase 2 | Pending |
-| UX-01 | Phase 2 | Pending |
-| UX-02 | Phase 2 | Pending |
-| UX-03 | Phase 2 | Pending |
-| UX-04 | Phase 2 | Pending |
-| UX-05 | Phase 2 | Pending |
+| AUTH-01 | Phase 2 | Done    |
+| AUTH-02 | Phase 2 | Done    |
+| AUTH-03 | Phase 2 | Done    |
+| AUTH-04 | Phase 2 | Done    |
+| AUTH-05 | Phase 2 | Done    |
+| ONBOARD-01 | Phase 2 | Done    |
+| ONBOARD-02 | Phase 2 | Done    |
+| ONBOARD-03 | Phase 2 | Done    |
+| SYNC-01 | Phase 2 | Done    |
+| SYNC-02 | Phase 2 | Done    |
+| UX-01 | Phase 2 | Done    |
+| UX-02 | Phase 2 | Done    |
+| UX-03 | Phase 2 | Done    |
+| UX-04 | Phase 2 | Done    |
+| UX-05 | Phase 2 | Done    |
 | STREAK-01 | Phase 3 | Pending |
 | STREAK-02 | Phase 3 | Pending |
 | STREAK-03 | Phase 3 | Pending |
