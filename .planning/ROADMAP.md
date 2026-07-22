@@ -157,7 +157,7 @@ Plans:
 
 **Plans:** 4 plans
 Plans:
-- [ ] 06-01-PLAN.md — SQL migration 008 (is_admin + words table) + Next.js scaffold + auth middleware + admin layout (ADMIN-01)
+- [x] 06-01-PLAN.md — SQL migration 008 (is_admin + words table) + Next.js scaffold + auth middleware + admin layout (ADMIN-01)
 - [ ] 06-02-PLAN.md — Vocabulary CRUD: list page + create form + edit/delete form with Supabase Storage image upload (ADMIN-02, ADMIN-03, ADMIN-04)
 - [ ] 06-03-PLAN.md — User management table + ban/unban Server Actions (ADMIN-05, ADMIN-06)
 - [ ] 06-04-PLAN.md — Analytics dashboard (DAU + top modes Recharts) + Daily challenge manual scheduler with override (ADMIN-07, ADMIN-08)
@@ -249,7 +249,7 @@ Plans:
 | SOCIAL-02 | Phase 5 | Pending |
 | SOCIAL-03 | Phase 5 | Pending |
 | SOCIAL-04 | Phase 5 | Pending |
-| ADMIN-01 | Phase 6 | Pending |
+| ADMIN-01 | Phase 6 | Complete |
 | ADMIN-02 | Phase 6 | Pending |
 | ADMIN-03 | Phase 6 | Pending |
 | ADMIN-04 | Phase 6 | Pending |
