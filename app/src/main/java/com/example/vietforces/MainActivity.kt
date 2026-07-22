@@ -29,6 +29,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import com.example.vietforces.data.manager.AiManager
 import com.example.vietforces.data.manager.EncounteredItemsManager
 import com.example.vietforces.data.manager.NotificationManager
@@ -463,6 +465,18 @@ fun VietforcesApp(migrationService: MigrationService) {
             // Daily Challenge — full-screen overlay (no bottom nav)
             composable(Screen.DailyChallenge.route) {
                 DailyChallengeScreen(
+                    onBackClick = { navController.popBackStack() }
+                )
+            }
+
+            // Social: Public Profile — push screen, no bottom nav (SOCIAL-03)
+            composable(
+                route = Screen.PublicProfile.route,
+                arguments = listOf(navArgument("userId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val userId = backStackEntry.arguments?.getString("userId") ?: return@composable
+                PublicProfileScreen(
+                    userId = userId,
                     onBackClick = { navController.popBackStack() }
                 )
             }

@@ -36,6 +36,13 @@ sealed class Screen(val route: String) {
     // Daily Challenge
     object DailyChallenge : Screen("daily_challenge")
 
+    // Social screens (Phase 5)
+    object SearchUsers : Screen("social/search")
+
+    object PublicProfile : Screen("social/profile/{userId}") {
+        fun createRoute(userId: String): String = "social/profile/$userId"
+    }
+
     companion object {
         fun getGameRoute(gameModeId: String): String = "game/$gameModeId"
     }
