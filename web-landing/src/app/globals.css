@@ -1,0 +1,8 @@
+@import "tailwindcss";
+
+@theme {
+  --color-viet-red: #DA251D;
+  --color-viet-yellow: #FFCD00;
+  --color-viet-dark: #1A1A1A;
+  --font-sans: 'system-ui', sans-serif;
+}
