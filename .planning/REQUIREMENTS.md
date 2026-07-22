@@ -123,24 +123,75 @@ Deferred to future release.
 
 ## Traceability
 
-Sẽ được cập nhật bởi roadmapper agent.
+*Updated by roadmapper agent: 2026-07-22*
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PRE-01, PRE-02 | Phase 0 | Pending |
-| FOUND-01–05 | Phase 1 | Pending |
-| AUTH-01–05, ONBOARD-01–03, SYNC-01–02 | Phase 2 | Pending |
-| STREAK-01–04, ELO-01–02, LEAD-01–04 | Phase 3 | Pending |
-| DAILY-01–04, NOTIF-01–05 | Phase 4 | Pending |
-| SOCIAL-01–04 | Phase 5 | Pending |
-| UX-01–05 | Phase 2+3 | Pending |
-| ADMIN-01–08 | Phase 6 | Pending |
-| LAND-01–05 | Phase 7 | Pending |
+| PRE-01 | Phase 0 — Pre-work Fixes | Pending |
+| PRE-02 | Phase 0 — Pre-work Fixes | Pending |
+| FOUND-01 | Phase 1 — Supabase Foundation | Pending |
+| FOUND-02 | Phase 1 — Supabase Foundation | Pending |
+| FOUND-03 | Phase 1 — Supabase Foundation | Pending |
+| FOUND-04 | Phase 1 — Supabase Foundation | Pending |
+| FOUND-05 | Phase 1 — Supabase Foundation | Pending |
+| AUTH-01 | Phase 2 — Auth + Onboarding + Sync + UX | Pending |
+| AUTH-02 | Phase 2 — Auth + Onboarding + Sync + UX | Pending |
+| AUTH-03 | Phase 2 — Auth + Onboarding + Sync + UX | Pending |
+| AUTH-04 | Phase 2 — Auth + Onboarding + Sync + UX | Pending |
+| AUTH-05 | Phase 2 — Auth + Onboarding + Sync + UX | Pending |
+| ONBOARD-01 | Phase 2 — Auth + Onboarding + Sync + UX | Pending |
+| ONBOARD-02 | Phase 2 — Auth + Onboarding + Sync + UX | Pending |
+| ONBOARD-03 | Phase 2 — Auth + Onboarding + Sync + UX | Pending |
+| SYNC-01 | Phase 2 — Auth + Onboarding + Sync + UX | Pending |
+| SYNC-02 | Phase 2 — Auth + Onboarding + Sync + UX | Pending |
+| UX-01 | Phase 2 — Auth + Onboarding + Sync + UX | Pending |
+| UX-02 | Phase 2 — Auth + Onboarding + Sync + UX | Pending |
+| UX-03 | Phase 2 — Auth + Onboarding + Sync + UX | Pending |
+| UX-04 | Phase 2 — Auth + Onboarding + Sync + UX | Pending |
+| UX-05 | Phase 2 — Auth + Onboarding + Sync + UX | Pending |
+| STREAK-01 | Phase 3 — Streak + Leaderboard | Pending |
+| STREAK-02 | Phase 3 — Streak + Leaderboard | Pending |
+| STREAK-03 | Phase 3 — Streak + Leaderboard | Pending |
+| STREAK-04 | Phase 3 — Streak + Leaderboard | Pending |
+| ELO-01 | Phase 3 — Streak + Leaderboard | Pending |
+| ELO-02 | Phase 3 — Streak + Leaderboard | Pending |
+| LEAD-01 | Phase 3 — Streak + Leaderboard | Pending |
+| LEAD-02 | Phase 3 — Streak + Leaderboard | Pending |
+| LEAD-03 | Phase 3 — Streak + Leaderboard | Pending |
+| LEAD-04 | Phase 3 — Streak + Leaderboard | Pending |
+| DAILY-01 | Phase 4 — Daily Challenge + Notifications | Pending |
+| DAILY-02 | Phase 4 — Daily Challenge + Notifications | Pending |
+| DAILY-03 | Phase 4 — Daily Challenge + Notifications | Pending |
+| DAILY-04 | Phase 4 — Daily Challenge + Notifications | Pending |
+| NOTIF-01 | Phase 4 — Daily Challenge + Notifications | Pending |
+| NOTIF-02 | Phase 4 — Daily Challenge + Notifications | Pending |
+| NOTIF-03 | Phase 4 — Daily Challenge + Notifications | Pending |
+| NOTIF-04 | Phase 4 — Daily Challenge + Notifications | Pending |
+| NOTIF-05 | Phase 4 — Daily Challenge + Notifications | Pending |
+| SOCIAL-01 | Phase 5 — Social / Friends | Pending |
+| SOCIAL-02 | Phase 5 — Social / Friends | Pending |
+| SOCIAL-03 | Phase 5 — Social / Friends | Pending |
+| SOCIAL-04 | Phase 5 — Social / Friends | Pending |
+| ADMIN-01 | Phase 6 — Web Admin Dashboard | Pending |
+| ADMIN-02 | Phase 6 — Web Admin Dashboard | Pending |
+| ADMIN-03 | Phase 6 — Web Admin Dashboard | Pending |
+| ADMIN-04 | Phase 6 — Web Admin Dashboard | Pending |
+| ADMIN-05 | Phase 6 — Web Admin Dashboard | Pending |
+| ADMIN-06 | Phase 6 — Web Admin Dashboard | Pending |
+| ADMIN-07 | Phase 6 — Web Admin Dashboard | Pending |
+| ADMIN-08 | Phase 6 — Web Admin Dashboard | Pending |
+| LAND-01 | Phase 7 — Landing Page | Pending |
+| LAND-02 | Phase 7 — Landing Page | Pending |
+| LAND-03 | Phase 7 — Landing Page | Pending |
+| LAND-04 | Phase 7 — Landing Page | Pending |
+| LAND-05 | Phase 7 — Landing Page | Pending |
 
 **Coverage:**
-- v1 requirements: 56 total
-- Mapped to phases: 56
+- v1 requirements: 58 enumerated IDs
+- Mapped to phases: 58
 - Unmapped: 0 ✓
+
+*(Note: original doc header stated 56; actual enumerated IDs count to 58 — all are mapped above.)*
 
 ---
 *Requirements defined: 2026-07-22*
