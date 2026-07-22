@@ -37,6 +37,7 @@ fun MainScreen(
     onLearningPathClick: () -> Unit = {},
     onRoleplayClick: () -> Unit = {},
     onSearchFriendsClick: () -> Unit = {},
+    onActivityFeedClick: () -> Unit = {},
     onGameModeClick: (GameMode) -> Unit
 ) {
     // Get real data from UserProgressManager
@@ -87,6 +88,15 @@ fun MainScreen(
                 }
             },
             actions = {
+                // Activity Feed icon
+                IconButton(onClick = onActivityFeedClick) {
+                    Icon(
+                        imageVector = Icons.Default.DynamicFeed,
+                        contentDescription = "Hoạt động bạn bè",
+                        tint = androidx.compose.ui.graphics.Color(0xFF616161),
+                        modifier = Modifier.size(26.dp)
+                    )
+                }
                 // Notification Bell with Badge
                 BadgedBox(
                     badge = {
@@ -145,6 +155,11 @@ fun MainScreen(
             // Find Friends card (SOCIAL-01, SOCIAL-02)
             item {
                 FindFriendsCard(onClick = onSearchFriendsClick)
+            }
+
+            // Activity Feed card (SOCIAL-04)
+            item {
+                ActivityFeedCard(onClick = onActivityFeedClick)
             }
 
 
@@ -249,6 +264,54 @@ private fun StatsCard(
                 value = elo.toString(),
                 label = "Điểm Elo",
                 backgroundColor = VietYellow.copy(alpha = 0.1f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun ActivityFeedCard(onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(VietRed.copy(alpha = 0.12f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = "📰", fontSize = 24.sp)
+            }
+            Spacer(modifier = Modifier.width(14.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Hoạt động bạn bè 📰",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = TextPrimary
+                )
+                Text(
+                    text = "Xem thách đấu và thành tích của người theo dõi",
+                    fontSize = 12.sp,
+                    color = TextSecondary
+                )
+            }
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = null,
+                tint = TextSecondary
             )
         }
     }

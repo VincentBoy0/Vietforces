@@ -262,6 +262,9 @@ fun VietforcesApp(migrationService: MigrationService) {
                     onSearchFriendsClick = {
                         navController.navigate(Screen.SearchUsers.route)
                     },
+                    onActivityFeedClick = {
+                        navController.navigate(Screen.ActivityFeed.route)
+                    },
                     onGameModeClick = { gameMode ->
                         when (gameMode) {
                             GameMode.IMAGE_TO_WORD -> {
@@ -491,6 +494,16 @@ fun VietforcesApp(migrationService: MigrationService) {
                         navController.navigate(Screen.PublicProfile.createRoute(userId))
                     },
                     onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            // Social: Activity Feed — friends' daily completions and ELO events (SOCIAL-04)
+            composable(Screen.ActivityFeed.route) {
+                ActivityFeedScreen(
+                    onBackClick = { navController.popBackStack() },
+                    onNavigateToProfile = { userId ->
+                        navController.navigate(Screen.PublicProfile.createRoute(userId))
+                    }
                 )
             }
         }

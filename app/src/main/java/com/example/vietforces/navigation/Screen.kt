@@ -43,6 +43,9 @@ sealed class Screen(val route: String) {
         fun createRoute(userId: String): String = "social/profile/$userId"
     }
 
+    // Activity feed — friends' daily completions and ELO events (SOCIAL-04)
+    object ActivityFeed : Screen("social/feed")
+
     companion object {
         fun getGameRoute(gameModeId: String): String = "game/$gameModeId"
     }
