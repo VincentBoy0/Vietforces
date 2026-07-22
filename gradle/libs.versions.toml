@@ -14,7 +14,7 @@ okhttp = "4.12.0"
 coroutines = "1.11.0"
 supabase = "3.7.0"
 ktor = "3.5.1"
-hilt = "2.60.1"
+hilt = "2.51.1"
 hilt-androidx = "1.2.0"
 ksp = "2.0.21-1.0.28"
 serialization = "1.11.0"
@@ -48,6 +48,7 @@ kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
 hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hilt-androidx" }
+lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleRuntimeKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

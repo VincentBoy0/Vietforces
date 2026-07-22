@@ -41,3 +41,10 @@ val RoosterYellow = Color(0xFFFFEB3B)
 // Additional game colors
 val GoldenYellow = Color(0xFFFFC107)
 
+// Dark mode variants (UX-05)
+val BackgroundDark = Color(0xFF121212)
+val SurfaceDark = Color(0xFF1E1E1E)
+val CardBackgroundDark = Color(0xFF2C2C2C)
+val TextPrimaryDark = Color(0xFFEEEEEE)
+val TextSecondaryDark = Color(0xFFAAAAAA)
+

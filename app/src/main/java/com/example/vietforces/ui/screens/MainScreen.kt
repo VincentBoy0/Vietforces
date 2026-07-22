@@ -21,8 +21,11 @@ import androidx.compose.ui.unit.sp
 import com.example.vietforces.data.manager.NotificationManager
 import com.example.vietforces.data.manager.UserProgressManager
 import com.example.vietforces.data.model.GameMode
+import com.example.vietforces.ui.components.EmptyStateComposable
 import com.example.vietforces.ui.components.GameModeCard
+import com.example.vietforces.ui.components.ShimmerBox
 import com.example.vietforces.ui.theme.*
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,10 +44,17 @@ fun MainScreen(
 
     val gameModes = remember { GameMode.getAllModes() }
 
+    // UX-02: brief shimmer loading state before rendering game mode cards
+    var cardsLoaded by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        delay(150L)
+        cardsLoaded = true
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(BackgroundLight)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         // Top Bar with Profile and Notification
         TopAppBar(
@@ -103,7 +113,7 @@ fun MainScreen(
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = Color.White
+                containerColor = MaterialTheme.colorScheme.surface
             )
         )
 
@@ -137,12 +147,33 @@ fun MainScreen(
                 )
             }
 
-            // Game Mode Cards
-            items(gameModes) { gameMode ->
-                GameModeCard(
-                    gameMode = gameMode,
-                    onClick = { onGameModeClick(gameMode) }
-                )
+            // Game Mode Cards — shimmer placeholders while loading (UX-02, UX-03)
+            if (!cardsLoaded) {
+                items(3) {
+                    ShimmerBox(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(120.dp)
+                            .padding(bottom = 4.dp)
+                    )
+                }
+            } else if (gameModes.isEmpty()) {
+                // UX-01: empty state when no game modes are available
+                item {
+                    EmptyStateComposable(
+                        illustration = "🎮",
+                        message = "Chưa có chế độ chơi nào.\nVui lòng thử lại sau.",
+                        ctaText = null,
+                        onCtaClick = null
+                    )
+                }
+            } else {
+                items(gameModes) { gameMode ->
+                    GameModeCard(
+                        gameMode = gameMode,
+                        onClick = { onGameModeClick(gameMode) }
+                    )
+                }
             }
 
             // Roleplay conversation tutor (AI chat)
@@ -172,7 +203,7 @@ private fun StatsCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color.White
+            containerColor = MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
@@ -271,7 +302,7 @@ private fun RoleplayCard(onClick: () -> Unit) {
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
@@ -336,7 +367,7 @@ private fun WritingPracticeCard(onClick: () -> Unit) {
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(

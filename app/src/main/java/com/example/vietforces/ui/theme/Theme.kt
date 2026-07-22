@@ -1,54 +1,47 @@
 package com.example.vietforces.ui.theme
 
-import android.app.Activity
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = VietRed,
+    onPrimary = Color.White,
+    secondary = VietYellow,
+    onSecondary = Color.Black,
+    background = BackgroundDark,
+    onBackground = TextPrimaryDark,
+    surface = SurfaceDark,
+    onSurface = TextPrimaryDark,
+    surfaceVariant = Color(0xFF3A3A3A),
+    onSurfaceVariant = TextSecondaryDark
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
+    primary = VietRed,
     onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    secondary = VietYellow,
+    onSecondary = Color.Black,
+    background = BackgroundLight,
+    onBackground = TextPrimary,
+    surface = Color.White,
+    onSurface = TextPrimary,
+    surfaceVariant = Color(0xFFEEEEEE),
+    onSurfaceVariant = TextSecondary
 )
 
 @Composable
 fun VietforcesTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    // dynamicColor defaults to false to preserve VietRed/VietYellow brand colors on all API levels.
+    // Setting true on Android 12+ would override brand colors with system wallpaper colors (Material You).
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
+    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
 
     MaterialTheme(
         colorScheme = colorScheme,
