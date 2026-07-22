@@ -22,8 +22,8 @@
 - [ ] **AUTH-03**: User có thể đăng nhập bằng email/password và session tồn tại xuyên suốt app restart
 - [ ] **AUTH-04**: User có thể đăng xuất từ Settings screen
 - [ ] **AUTH-05**: User có thể reset password qua email link
-- [ ] **ONBOARD-01**: User mới thấy onboarding flow 4 màn hình (Welcome → Chọn level → Chọn goal/day → Nhập tên/avatar) trước khi yêu cầu đăng ký
-- [ ] **ONBOARD-02**: User có thể chơi guest mode (ít nhất 1 game mode hoàn chỉnh) trước khi tạo tài khoản
+- [x] **ONBOARD-01**: User mới thấy onboarding flow 4 màn hình (Welcome → Chọn level → Chọn goal/day → Nhập tên/avatar) trước khi yêu cầu đăng ký
+- [x] **ONBOARD-02**: User có thể chơi guest mode (ít nhất 1 game mode hoàn chỉnh) trước khi tạo tài khoản
 - [ ] **ONBOARD-03**: Khi guest đăng ký, toàn bộ tiến độ local (ELO, streak, từ đã học) được migrate lên Supabase
 - [ ] **SYNC-01**: Tiến độ học (ELO, streak, từ đã gặp, last_practiced) được sync lên Supabase sau mỗi game session kết thúc
 - [ ] **SYNC-02**: App load tiến độ từ Supabase khi mở lần đầu sau khi đăng nhập (overwrite local nếu cloud mới hơn)
@@ -139,8 +139,8 @@ Deferred to future release.
 | AUTH-03 | Phase 2 — Auth + Onboarding + Sync + UX | Pending |
 | AUTH-04 | Phase 2 — Auth + Onboarding + Sync + UX | Pending |
 | AUTH-05 | Phase 2 — Auth + Onboarding + Sync + UX | Pending |
-| ONBOARD-01 | Phase 2 — Auth + Onboarding + Sync + UX | Pending |
-| ONBOARD-02 | Phase 2 — Auth + Onboarding + Sync + UX | Pending |
+| ONBOARD-01 | Phase 2 — Auth + Onboarding + Sync + UX | Complete |
+| ONBOARD-02 | Phase 2 — Auth + Onboarding + Sync + UX | Complete |
 | ONBOARD-03 | Phase 2 — Auth + Onboarding + Sync + UX | Pending |
 | SYNC-01 | Phase 2 — Auth + Onboarding + Sync + UX | Pending |
 | SYNC-02 | Phase 2 — Auth + Onboarding + Sync + UX | Pending |
@@ -187,6 +187,7 @@ Deferred to future release.
 | LAND-05 | Phase 7 — Landing Page | Pending |
 
 **Coverage:**
+
 - v1 requirements: 58 enumerated IDs
 - Mapped to phases: 58
 - Unmapped: 0 ✓
