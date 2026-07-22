@@ -85,7 +85,11 @@ fun LeaderboardScreen(viewModel: LeaderboardViewModel = hiltViewModel()) {
         )
 
         // ── Tab Row ──────────────────────────────────────────────────────────
-        val selectedTabIndex = if (uiState.selectedTab == LeaderboardTab.ALL_TIME) 0 else 1
+        val selectedTabIndex = when (uiState.selectedTab) {
+            LeaderboardTab.ALL_TIME -> 0
+            LeaderboardTab.THIS_WEEK -> 1
+            LeaderboardTab.FRIENDS -> 2
+        }
         TabRow(selectedTabIndex = selectedTabIndex) {
             Tab(
                 selected = selectedTabIndex == 0,
@@ -96,6 +100,11 @@ fun LeaderboardScreen(viewModel: LeaderboardViewModel = hiltViewModel()) {
                 selected = selectedTabIndex == 1,
                 onClick = { viewModel.selectTab(LeaderboardTab.THIS_WEEK) },
                 text = { Text("Tuần này 📅") }
+            )
+            Tab(
+                selected = selectedTabIndex == 2,
+                onClick = { viewModel.selectTab(LeaderboardTab.FRIENDS) },
+                text = { Text("Bạn bè 👥") }
             )
         }
 
@@ -132,11 +141,19 @@ fun LeaderboardScreen(viewModel: LeaderboardViewModel = hiltViewModel()) {
 
                 // Empty state (UX-01)
                 uiState.entries.isEmpty() -> {
-                    EmptyStateComposable(
-                        illustration = "🏆",
-                        message = "Chưa có dữ liệu xếp hạng",
-                        modifier = Modifier.fillMaxSize()
-                    )
+                    if (uiState.selectedTab == LeaderboardTab.FRIENDS) {
+                        EmptyStateComposable(
+                            illustration = "👥",
+                            message = "Bạn chưa theo dõi ai.\nTìm bạn bè để xem bảng xếp hạng.",
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    } else {
+                        EmptyStateComposable(
+                            illustration = "🏆",
+                            message = "Chưa có dữ liệu xếp hạng",
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
                 }
 
                 // Success: ranked list + optional own-rank footer

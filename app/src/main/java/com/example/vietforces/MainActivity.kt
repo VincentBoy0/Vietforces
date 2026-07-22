@@ -259,6 +259,9 @@ fun VietforcesApp(migrationService: MigrationService) {
                     onRoleplayClick = {
                         navController.navigate(Screen.Roleplay.route)
                     },
+                    onSearchFriendsClick = {
+                        navController.navigate(Screen.SearchUsers.route)
+                    },
                     onGameModeClick = { gameMode ->
                         when (gameMode) {
                             GameMode.IMAGE_TO_WORD -> {
@@ -478,6 +481,16 @@ fun VietforcesApp(migrationService: MigrationService) {
                 PublicProfileScreen(
                     userId = userId,
                     onBackClick = { navController.popBackStack() }
+                )
+            }
+
+            // Social: Search Users (SOCIAL-01, SOCIAL-02)
+            composable(Screen.SearchUsers.route) {
+                SearchUsersScreen(
+                    onUserClick = { userId ->
+                        navController.navigate(Screen.PublicProfile.createRoute(userId))
+                    },
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
         }

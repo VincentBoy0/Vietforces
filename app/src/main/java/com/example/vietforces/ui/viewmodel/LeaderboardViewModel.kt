@@ -94,7 +94,10 @@ class LeaderboardViewModel @Inject constructor(
             }
 
             val entries = top50Result.getOrDefault(emptyList())
-            val myEntry = repository.getMyEntry().getOrNull()
+            // Skip my-entry lookup for FRIENDS tab (no personal pinned row needed)
+            val myEntry = if (tab != LeaderboardTab.FRIENDS) {
+                repository.getMyEntry().getOrNull()
+            } else null
 
             // Find 1-based position in the fetched top-50 list; -1 = not in top 50 (LEAD-02)
             val myRank = if (myEntry != null) {

@@ -36,6 +36,7 @@ fun MainScreen(
     onWritingPracticeClick: () -> Unit = {},
     onLearningPathClick: () -> Unit = {},
     onRoleplayClick: () -> Unit = {},
+    onSearchFriendsClick: () -> Unit = {},
     onGameModeClick: (GameMode) -> Unit
 ) {
     // Get real data from UserProgressManager
@@ -141,6 +142,11 @@ fun MainScreen(
                 DailyChallengeCard(onClick = onDailyChallengeClick)
             }
 
+            // Find Friends card (SOCIAL-01, SOCIAL-02)
+            item {
+                FindFriendsCard(onClick = onSearchFriendsClick)
+            }
+
 
             // Section Title
             item {
@@ -243,6 +249,54 @@ private fun StatsCard(
                 value = elo.toString(),
                 label = "Điểm Elo",
                 backgroundColor = VietYellow.copy(alpha = 0.1f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun FindFriendsCard(onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFF1B5E20).copy(alpha = 0.12f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = "🔍", fontSize = 24.sp)
+            }
+            Spacer(modifier = Modifier.width(14.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Tìm bạn bè 👥",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = TextPrimary
+                )
+                Text(
+                    text = "Tìm kiếm và theo dõi người dùng khác",
+                    fontSize = 12.sp,
+                    color = TextSecondary
+                )
+            }
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = null,
+                tint = TextSecondary
             )
         }
     }
