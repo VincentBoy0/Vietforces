@@ -81,7 +81,7 @@ object UserProgressManager {
      * Get today's date string
      */
     private fun getTodayDateString(): String {
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.ROOT)
         return dateFormat.format(Date())
     }
 
@@ -186,7 +186,7 @@ object UserProgressManager {
             return
         } else {
             // Check if yesterday
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.ROOT)
             try {
                 val lastPractice = dateFormat.parse(lastDate)
                 val todayDate = dateFormat.parse(today)
