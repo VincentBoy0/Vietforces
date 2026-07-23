@@ -12,6 +12,10 @@ import io.github.jan.supabase.realtime.RealtimeChannel
 import io.github.jan.supabase.realtime.channel
 import io.github.jan.supabase.realtime.postgresChangeFlow
 import io.github.jan.supabase.realtime.realtime
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -60,6 +64,13 @@ class LeaderboardViewModel @Inject constructor(
 
     /** Holds the live Realtime channel; null until [subscribeRealtime] completes. */
     private var realtimeChannel: RealtimeChannel? = null
+
+    /**
+     * Dedicated scope for cleanup work in [onCleared]. Must NOT be viewModelScope because
+     * viewModelScope is cancelled before onCleared() executes — any coroutine launched on
+     * it would be immediately cancelled without running the cleanup body (CR-05).
+     */
+    private val cleanupScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     init {
         loadLeaderboard()
@@ -149,11 +160,16 @@ class LeaderboardViewModel @Inject constructor(
     /**
      * Removes the Realtime channel when this ViewModel is cleared (LEAD-04).
      * Prevents dangling WebSocket subscriptions after the screen is destroyed.
+     *
+     * Uses [cleanupScope] (not viewModelScope) because viewModelScope is already
+     * cancelled by the time onCleared() is called — coroutines on a cancelled scope
+     * never execute (CR-05).
      */
     override fun onCleared() {
         super.onCleared()
-        viewModelScope.launch {
+        cleanupScope.launch {
             realtimeChannel?.let { supabase.realtime.removeChannel(it) }
+            cleanupScope.cancel()
         }
     }
 }
