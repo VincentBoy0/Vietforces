@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS public.streak_history (
 ALTER TABLE public.streak_history ENABLE ROW LEVEL SECURITY;
 
 -- Users may read their own history (for streak heatmap, STREAK-04)
-CREATE POLICY IF NOT EXISTS "streak_history_select_own"
+CREATE POLICY "streak_history_select_own"
   ON public.streak_history FOR SELECT
   USING (user_id = auth.uid());
 

@@ -21,16 +21,16 @@ CREATE TABLE IF NOT EXISTS public.users (
 
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "users_select_own"
+CREATE POLICY "users_select_own"
   ON public.users FOR SELECT
   USING (id = auth.uid());
 
-CREATE POLICY IF NOT EXISTS "users_update_own"
+CREATE POLICY "users_update_own"
   ON public.users FOR UPDATE
   USING (id = auth.uid())
   WITH CHECK (id = auth.uid());
 
-CREATE POLICY IF NOT EXISTS "users_insert_own"
+CREATE POLICY "users_insert_own"
   ON public.users FOR INSERT
   WITH CHECK (id = auth.uid());
 
@@ -52,15 +52,15 @@ CREATE TABLE IF NOT EXISTS public.user_progress (
 
 ALTER TABLE public.user_progress ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "progress_select_own"
+CREATE POLICY "progress_select_own"
   ON public.user_progress FOR SELECT
   USING (user_id = auth.uid());
 
-CREATE POLICY IF NOT EXISTS "progress_insert_own"
+CREATE POLICY "progress_insert_own"
   ON public.user_progress FOR INSERT
   WITH CHECK (user_id = auth.uid());
 
-CREATE POLICY IF NOT EXISTS "progress_update_own"
+CREATE POLICY "progress_update_own"
   ON public.user_progress FOR UPDATE
   USING (user_id = auth.uid())
   WITH CHECK (user_id = auth.uid());
@@ -82,17 +82,17 @@ CREATE TABLE IF NOT EXISTS public.leaderboard (
 ALTER TABLE public.leaderboard ENABLE ROW LEVEL SECURITY;
 
 -- Public read — anyone can see the leaderboard
-CREATE POLICY IF NOT EXISTS "leaderboard_select_all"
+CREATE POLICY "leaderboard_select_all"
   ON public.leaderboard FOR SELECT
   USING (TRUE);
 
 -- Only service_role may write
-CREATE POLICY IF NOT EXISTS "leaderboard_service_insert"
+CREATE POLICY "leaderboard_service_insert"
   ON public.leaderboard FOR INSERT
   TO service_role
   WITH CHECK (TRUE);
 
-CREATE POLICY IF NOT EXISTS "leaderboard_service_update"
+CREATE POLICY "leaderboard_service_update"
   ON public.leaderboard FOR UPDATE
   TO service_role
   USING (TRUE);
@@ -113,12 +113,12 @@ CREATE TABLE IF NOT EXISTS public.daily_challenges (
 ALTER TABLE public.daily_challenges ENABLE ROW LEVEL SECURITY;
 
 -- Public read — all authenticated and anonymous users may read today's challenge
-CREATE POLICY IF NOT EXISTS "challenges_select_all"
+CREATE POLICY "challenges_select_all"
   ON public.daily_challenges FOR SELECT
   USING (TRUE);
 
 -- Only service_role may insert new daily challenges
-CREATE POLICY IF NOT EXISTS "challenges_service_insert"
+CREATE POLICY "challenges_service_insert"
   ON public.daily_challenges FOR INSERT
   TO service_role
   WITH CHECK (TRUE);
@@ -137,15 +137,15 @@ CREATE TABLE IF NOT EXISTS public.friendships (
 
 ALTER TABLE public.friendships ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "friendships_select_own"
+CREATE POLICY "friendships_select_own"
   ON public.friendships FOR SELECT
   USING (follower_id = auth.uid() OR following_id = auth.uid());
 
-CREATE POLICY IF NOT EXISTS "friendships_insert_own"
+CREATE POLICY "friendships_insert_own"
   ON public.friendships FOR INSERT
   WITH CHECK (follower_id = auth.uid());
 
-CREATE POLICY IF NOT EXISTS "friendships_delete_own"
+CREATE POLICY "friendships_delete_own"
   ON public.friendships FOR DELETE
   USING (follower_id = auth.uid());
 
@@ -161,15 +161,15 @@ CREATE TABLE IF NOT EXISTS public.fcm_tokens (
 
 ALTER TABLE public.fcm_tokens ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "fcm_select_own"
+CREATE POLICY "fcm_select_own"
   ON public.fcm_tokens FOR SELECT
   USING (user_id = auth.uid());
 
-CREATE POLICY IF NOT EXISTS "fcm_insert_own"
+CREATE POLICY "fcm_insert_own"
   ON public.fcm_tokens FOR INSERT
   WITH CHECK (user_id = auth.uid());
 
-CREATE POLICY IF NOT EXISTS "fcm_update_own"
+CREATE POLICY "fcm_update_own"
   ON public.fcm_tokens FOR UPDATE
   USING (user_id = auth.uid())
   WITH CHECK (user_id = auth.uid());

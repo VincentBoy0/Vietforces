@@ -5,7 +5,7 @@
 --              + public RLS policies for social features
 --              (SOCIAL-01, SOCIAL-03, SOCIAL-04)
 -- Idempotent : yes — CREATE TABLE IF NOT EXISTS,
---              CREATE POLICY IF NOT EXISTS,
+--              CREATE POLICY,
 --              CREATE OR REPLACE FUNCTION / TRIGGER throughout
 -- ============================================================
 
@@ -40,7 +40,7 @@ CREATE INDEX IF NOT EXISTS idx_activity_events_created_at
 
 -- Authenticated user can read their own events AND events of users they follow
 -- (asymmetric follow model: follower_id = current user, following_id = event author)
-CREATE POLICY IF NOT EXISTS "activity_events_select_following"
+CREATE POLICY "activity_events_select_following"
   ON public.activity_events FOR SELECT
   USING (
     user_id = auth.uid()
@@ -55,7 +55,7 @@ CREATE POLICY IF NOT EXISTS "activity_events_select_following"
 -- Only service_role may INSERT directly (e.g. admin back-fill).
 -- The on_daily_completion_insert() SECURITY DEFINER trigger bypasses RLS,
 -- so this policy is belt-and-suspenders for direct service_role writes.
-CREATE POLICY IF NOT EXISTS "activity_events_service_insert"
+CREATE POLICY "activity_events_service_insert"
   ON public.activity_events FOR INSERT
   TO service_role
   WITH CHECK (TRUE);
@@ -104,7 +104,7 @@ CREATE OR REPLACE TRIGGER after_daily_completion_insert
 -- Security note: only username, id, avatar_url are queried by the Android client;
 -- is_banned, fcm_token, timezone are NOT projected in search queries (T-05-01-03).
 -- ---------------------------------------------------------------------------
-CREATE POLICY IF NOT EXISTS "users_select_public_username"
+CREATE POLICY "users_select_public_username"
   ON public.users FOR SELECT
   USING (TRUE);
 
@@ -115,6 +115,6 @@ CREATE POLICY IF NOT EXISTS "users_select_public_username"
 -- PublicProfileViewModel — low sensitivity for academic project (T-05-01-04).
 -- Existing progress_select_own / progress_update_own policies are unchanged.
 -- ---------------------------------------------------------------------------
-CREATE POLICY IF NOT EXISTS "progress_select_public"
+CREATE POLICY "progress_select_public"
   ON public.user_progress FOR SELECT
   USING (TRUE);

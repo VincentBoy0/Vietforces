@@ -17,7 +17,7 @@ ALTER TABLE public.users
 -- Allow authenticated users to update their own notification preferences.
 -- The existing users_select_public_username policy already allows SELECT;
 -- we add an UPDATE policy scoped to these two columns only.
-CREATE POLICY IF NOT EXISTS "users_update_notif_prefs"
+CREATE POLICY "users_update_notif_prefs"
   ON public.users FOR UPDATE
   USING (id = auth.uid())
   WITH CHECK (id = auth.uid());

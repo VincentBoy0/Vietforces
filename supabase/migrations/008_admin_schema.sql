@@ -4,7 +4,7 @@
 -- Description: Admin schema additions — is_admin flag on users +
 --              vocabulary words table with RLS policies.
 -- Idempotent : yes — ALTER TABLE ADD COLUMN IF NOT EXISTS +
---              CREATE TABLE IF NOT EXISTS + CREATE POLICY IF NOT EXISTS
+--              CREATE TABLE IF NOT EXISTS + CREATE POLICY
 -- ============================================================
 
 -- ---------------------------------------------------------------------------
@@ -31,12 +31,12 @@ CREATE TABLE IF NOT EXISTS public.words (
 ALTER TABLE public.words ENABLE ROW LEVEL SECURITY;
 
 -- Public read — all users (including anonymous) can read vocabulary
-CREATE POLICY IF NOT EXISTS "words_select_public"
+CREATE POLICY "words_select_public"
   ON public.words FOR SELECT
   USING (TRUE);
 
 -- Admin write — only authenticated admins can insert
-CREATE POLICY IF NOT EXISTS "words_admin_write"
+CREATE POLICY "words_admin_write"
   ON public.words FOR INSERT
   TO authenticated
   WITH CHECK (
@@ -47,7 +47,7 @@ CREATE POLICY IF NOT EXISTS "words_admin_write"
   );
 
 -- Admin update — only authenticated admins can update
-CREATE POLICY IF NOT EXISTS "words_admin_update"
+CREATE POLICY "words_admin_update"
   ON public.words FOR UPDATE
   TO authenticated
   USING (
@@ -64,7 +64,7 @@ CREATE POLICY IF NOT EXISTS "words_admin_update"
   );
 
 -- Admin delete — only authenticated admins can delete
-CREATE POLICY IF NOT EXISTS "words_admin_delete"
+CREATE POLICY "words_admin_delete"
   ON public.words FOR DELETE
   TO authenticated
   USING (
