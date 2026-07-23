@@ -47,8 +47,9 @@ class ProgressRepository @Inject constructor(
          * Static accessor for use in places without full Hilt injection
          * (e.g., game managers that want to trigger sync after a session ends).
          * Set in init; always available after first injection.
+         * @Volatile ensures cross-thread visibility when read from background threads (WA-02).
          */
-        var instance: ProgressRepository? = null
+        @Volatile var instance: ProgressRepository? = null
     }
 
     init {

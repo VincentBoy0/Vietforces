@@ -55,8 +55,9 @@ class StreakRepository @Inject constructor(
         /**
          * Static accessor set during Hilt initialisation.
          * Always non-null after the singleton is first injected.
+         * @Volatile ensures cross-thread visibility when read from background threads (WA-02).
          */
-        var instance: StreakRepository? = null
+        @Volatile var instance: StreakRepository? = null
     }
 
     init {

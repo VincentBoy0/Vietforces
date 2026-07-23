@@ -75,8 +75,10 @@ class DailyChallengeRepository @Inject constructor(
 ) {
 
     companion object {
-        /** Static accessor set in init{} — non-null after first Hilt injection. */
-        var instance: DailyChallengeRepository? = null
+        /** Static accessor set in init{} — non-null after first Hilt injection.
+         * @Volatile ensures cross-thread visibility when read from background threads (WA-02).
+         */
+        @Volatile var instance: DailyChallengeRepository? = null
     }
 
     init {
