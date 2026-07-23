@@ -235,6 +235,9 @@ Deno.serve(async (req: Request) => {
         user_progress ( last_practice_date )
       `)
       .eq("is_banned", false)
+      // WA-05: Respect per-user streak notification opt-out preference.
+      // Column added by migration 010_notif_preferences.sql.
+      .eq("notif_streak_enabled", true)
 
     if (queryError) {
       console.error("send-streak-reminder: users query error", queryError)
