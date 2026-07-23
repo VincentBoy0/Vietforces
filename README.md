@@ -161,7 +161,7 @@ Sau khi tạo tài khoản bằng app hoặc Supabase Auth:
 -- Chạy trong Supabase Dashboard → SQL Editor
 UPDATE public.users
 SET is_admin = true
-WHERE email = 'your-admin@email.com';
+WHERE id = (SELECT id FROM auth.users WHERE email = 'your-admin@email.com');
 ```
 
 ---
