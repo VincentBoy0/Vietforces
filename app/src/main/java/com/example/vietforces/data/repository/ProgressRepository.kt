@@ -70,11 +70,10 @@ class ProgressRepository @Inject constructor(
         val session = UserProgressManager.getUserSession()
         return UserProgressDto(
             userId = userId,
-            eloRating = session.eloRating,
-            currentStreak = session.currentStreak,
-            longestStreak = session.longestStreak,
-            wordsLearnedCount = session.learnedWordIds.size,
-            lastPracticed = session.lastPracticeDate,
+            eloScore = session.eloRating,
+            streakCount = session.currentStreak,
+            lastPracticeDate = session.lastPracticeDate.ifEmpty { null },
+            totalGames = session.learnedWordIds.size,
             updatedAt = nowIso8601()
         )
     }
@@ -108,16 +107,15 @@ class ProgressRepository @Inject constructor(
             .getOrNull() ?: return Result.success(Unit)  // no cloud row yet
 
         val localDate = UserProgressManager.getUserSession().lastPracticeDate
-        val cloudDate = cloudDto.lastPracticed
+        val cloudDate = cloudDto.lastPracticeDate ?: ""
 
         if (cloudDate.isNotEmpty() && (localDate.isEmpty() || cloudDate > localDate)) {
             // Cloud is newer — overwrite local stats.
             // getUserSession() returns the live mutable object; mutations persist in memory.
             val session = UserProgressManager.getUserSession()
-            session.eloRating = cloudDto.eloRating
-            session.currentStreak = cloudDto.currentStreak
-            session.longestStreak = cloudDto.longestStreak
-            session.lastPracticeDate = cloudDto.lastPracticed
+            session.eloRating = cloudDto.eloScore
+            session.currentStreak = cloudDto.streakCount
+            session.lastPracticeDate = cloudDate
             // Note: learnedWordIds is a set of IDs; the cloud only stores the count.
             // We keep the local set intact and do NOT clear it — individual word IDs
             // cannot be restored from the count alone. The count is for display only.
