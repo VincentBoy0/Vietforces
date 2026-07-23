@@ -55,6 +55,12 @@ DECLARE
   v_days_diff   INT;
   v_was_freeze  BOOLEAN := FALSE;
 BEGIN
+  -- Security: reject calls where p_user_id ≠ the authenticated caller (CR-02)
+  IF p_user_id <> auth.uid() THEN
+    RAISE EXCEPTION 'unauthorized'
+      USING HINT = 'p_user_id must equal the calling user''s auth.uid()';
+  END IF;
+
   -- Fetch current streak state; use defaults for brand-new users
   SELECT last_practice_date, streak_count, streak_freeze_count
     INTO v_last_date, v_streak, v_freeze

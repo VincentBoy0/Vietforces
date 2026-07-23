@@ -64,6 +64,12 @@ DECLARE
   v_new_elo      INT;
   v_rank_tier    TEXT;
 BEGIN
+  -- Security: reject calls where p_user_id ≠ the authenticated caller (CR-02)
+  IF p_user_id <> auth.uid() THEN
+    RAISE EXCEPTION 'unauthorized'
+      USING HINT = 'p_user_id must equal the calling user''s auth.uid()';
+  END IF;
+
   -- Read current ELO; default to 1000 for new users
   SELECT elo_score INTO v_current_elo
     FROM public.user_progress
