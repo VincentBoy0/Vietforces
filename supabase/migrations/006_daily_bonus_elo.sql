@@ -84,8 +84,10 @@ BEGIN
 
   -- ----------------------------------------------------------------
   -- Credit streak — calls existing update_streak() (003_streak_function)
+  -- WA-06: use CURRENT_DATE (server clock) rather than p_challenge_date
+  -- so completing a stale cached challenge doesn't back-date the streak.
   -- ----------------------------------------------------------------
-  PERFORM public.update_streak(p_user_id, p_challenge_date);
+  PERFORM public.update_streak(p_user_id, CURRENT_DATE);
 
   RETURN v_elo_earned;
 END;
