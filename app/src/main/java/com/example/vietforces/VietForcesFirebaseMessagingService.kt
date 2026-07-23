@@ -6,14 +6,18 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.example.vietforces.data.manager.FCMTokenManager
+import com.example.vietforces.data.repository.AuthRepository
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import io.github.jan.supabase.auth.auth
+import dagger.hilt.android.AndroidEntryPoint
+import io.github.jan.supabase.SupabaseClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 private const val TAG = "VFMessagingService"
 private const val CHANNEL_ID = "vietforces_push"
@@ -32,7 +36,11 @@ private const val NOTIFICATION_ID_BASE = 2000
  * (google-services.json present). Without it, the service class compiles fine and the app
  * operates normally — push notifications are simply not delivered.
  */
+@AndroidEntryPoint
 class VietForcesFirebaseMessagingService : FirebaseMessagingService() {
+
+    @Inject lateinit var supabase: SupabaseClient
+    @Inject lateinit var authRepository: AuthRepository
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -44,22 +52,12 @@ class VietForcesFirebaseMessagingService : FirebaseMessagingService() {
         super.onNewToken(token)
         Log.d(TAG, "FCM token refreshed")
 
-        // Attempt to re-register with Supabase if a user session is active.
+        // Re-register with Supabase using the Hilt-injected SupabaseClient so we
+        // don't leak a new client instance on every token rotation (CR-04).
+        val userId = authRepository.currentUserId ?: return
         serviceScope.launch {
             try {
-                val supabaseUrl = BuildConfig.SUPABASE_URL
-                val supabaseKey = BuildConfig.SUPABASE_ANON_KEY
-                if (supabaseUrl.isBlank() || supabaseKey.isBlank()) return@launch
-
-                val client = io.github.jan.supabase.createSupabaseClient(
-                    supabaseUrl = supabaseUrl,
-                    supabaseKey = supabaseKey,
-                ) {
-                    install(io.github.jan.supabase.postgrest.Postgrest)
-                    install(io.github.jan.supabase.auth.Auth)
-                }
-                val userId = client.auth.currentUserOrNull()?.id ?: return@launch
-                com.example.vietforces.data.manager.FCMTokenManager.registerToken(userId, client)
+                FCMTokenManager.registerToken(userId, supabase)
             } catch (e: Exception) {
                 Log.w(TAG, "Token re-registration failed: ${e.message}")
             }
