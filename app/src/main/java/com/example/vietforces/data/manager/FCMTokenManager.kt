@@ -52,14 +52,23 @@ object FCMTokenManager {
     }
 
     /**
-     * Removes the FCM token row for [userId] from Supabase so this device
-     * no longer receives push notifications for that account.
+     * Removes the FCM token row for [userId] and the current device's token from Supabase
+     * so only this device no longer receives push notifications for that account.
+     *
+     * Filters by both user_id AND the current device token to avoid removing registrations
+     * from other devices owned by the same user (WA-01).
      */
     suspend fun deleteToken(userId: String, supabaseClient: SupabaseClient) {
         try {
+            val currentToken = try {
+                FirebaseMessaging.getInstance().token.await()
+            } catch (_: Exception) {
+                null
+            } ?: return  // no token — nothing to delete
             supabaseClient.postgrest["fcm_tokens"].delete {
                 filter {
                     eq("user_id", userId)
+                    eq("token", currentToken)
                 }
             }
             Log.d(TAG, "FCM token deleted for user $userId")
