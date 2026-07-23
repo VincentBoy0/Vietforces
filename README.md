@@ -193,48 +193,115 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 ```
 
-### Chạy development server
+### Giải thích các biến môi trường
+
+| Biến | Ý nghĩa | Cách lấy |
+|---|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | URL endpoint của Supabase project | Settings → API → **Project URL** |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Key public dùng ở browser, bị giới hạn bởi RLS | Settings → API → **anon / public** |
+| `SUPABASE_SERVICE_ROLE_KEY` | Key siêu cấp, bypass RLS — chỉ dùng server-side | Settings → API → **service_role / secret** |
+
+> ⚠️ **`SUPABASE_SERVICE_ROLE_KEY`** có toàn quyền đọc/ghi/xoá mọi bảng không qua RLS. **KHÔNG** đặt prefix `NEXT_PUBLIC_`, **KHÔNG** commit lên Git, **KHÔNG** dùng ở client component.
+
+Vị trí lấy key (cùng 1 trang):
+```
+supabase.com → [Project] → Settings ⚙️ → API
+                                         │
+                         ┌───────────────┴──────────────────┐
+                   Project URL                    Project API Keys
+          (NEXT_PUBLIC_SUPABASE_URL)     ┌─────────────────────────┐
+                                         │  anon  public            │ ← NEXT_PUBLIC_SUPABASE_ANON_KEY
+                                         │  service_role  secret    │ ← SUPABASE_SERVICE_ROLE_KEY ⚠️
+                                         └─────────────────────────┘
+```
+
+### Development server
+
+Dùng khi đang phát triển — hot reload, không cần build.
 
 ```bash
+# Thư mục: vietforces/web-admin/
 npm run dev
-# Mở http://localhost:3000
+# → Mở http://localhost:3000
+# → Sửa file → trình duyệt tự cập nhật ngay (hot reload)
 ```
 
-### Build production
+### Production build
+
+Dùng khi muốn chạy bản tối ưu hoá hoặc deploy lên server thật.
 
 ```bash
+# Thư mục: vietforces/web-admin/
+
+# Bước 1 — Compile và tối ưu (~1–2 phút)
 npm run build
+
+# Bước 2 — Khởi chạy server production
 npm start
+# → Chạy tại http://localhost:3000
 ```
+
+> **Lưu ý:** Web Admin dùng Next.js Server-side Rendering, cần server Node.js chạy liên tục. Sau khi `npm run build`, phải có `npm start` mới truy cập được — khác với landing page (file tĩnh).
+
+| | Development | Production |
+|---|---|---|
+| Lệnh | `npm run dev` | `npm run build` → `npm start` |
+| Hot reload | ✅ Có | ❌ Không |
+| Tốc độ | Chậm hơn | Nhanh hơn (minified) |
+| Mục đích | Phát triển, debug | Deploy thật sự |
 
 ### Deploy lên Vercel
 
 1. Push code lên GitHub
 2. Vào [vercel.com](https://vercel.com) → **Add New Project** → chọn repo
 3. Đặt **Root Directory** là `web-admin`
-4. Thêm các biến môi trường (từ `.env.local`) trong Vercel dashboard
-5. Deploy
+4. Thêm 3 biến môi trường trong Vercel dashboard (Environment Variables)
+5. Deploy — Vercel tự chạy `npm run build` và `npm start`
 
 ---
 
 ## 5. Cài đặt Landing Page
 
 ```bash
+# Thư mục: vietforces/web-landing/
 cd web-landing
-
 npm install
-npm run dev
-# Mở http://localhost:3001
 ```
 
-### Deploy lên Vercel (static export)
+### Development server
+
+```bash
+npm run dev
+# → Mở http://localhost:3001  (port 3001 để không đụng web-admin)
+```
+
+### Production build
+
+Landing page xuất ra **file HTML tĩnh** — không cần server Node.js chạy liên tục.
 
 ```bash
 npm run build
-# Thư mục out/ chứa HTML tĩnh, upload lên bất kỳ hosting nào
+# → Tạo thư mục web-landing/out/
+# → Thư mục out/ chứa toàn bộ HTML/CSS/JS tĩnh
+# → Upload thư mục out/ lên bất kỳ hosting tĩnh nào
 ```
 
-Hoặc deploy tự động qua Vercel (đặt Root Directory là `web-landing`).
+> **Không cần `npm start`** — khác với web-admin. Thư mục `out/` là website hoàn chỉnh, copy lên Netlify / GitHub Pages / S3 là chạy được.
+
+### Chạy cả hai cùng lúc (2 terminal)
+
+```bash
+# Terminal 1 — Web Admin
+cd web-admin && npm run dev     # http://localhost:3000
+
+# Terminal 2 — Landing Page
+cd web-landing && npm run dev   # http://localhost:3001
+```
+
+### Deploy lên Vercel
+
+Vào [vercel.com](https://vercel.com) → **Add New Project** → chọn repo → đặt **Root Directory** là `web-landing` → Deploy.
+Vercel tự chạy `npm run build` và host thư mục `out/` — không cần cấu hình gì thêm.
 
 ---
 
