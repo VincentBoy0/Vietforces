@@ -72,8 +72,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Initialize SharedPreferences and load saved data
-        PreferencesManager.init(this)
+        // Load saved data from SharedPreferences into manager singletons.
+        // PreferencesManager.init() is called in VietForcesApplication.onCreate() (CR-03).
         SettingsManager.loadFromPreferences()
         UserProgressManager.loadFromPreferences()
         NotificationManager.loadFromPreferences()
