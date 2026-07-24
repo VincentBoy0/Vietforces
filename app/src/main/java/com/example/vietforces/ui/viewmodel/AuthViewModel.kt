@@ -42,16 +42,16 @@ class AuthViewModel @Inject constructor(
             _uiState.value = AuthUiState.Loading
             authRepository.signIn(email, password)
                 .onSuccess { _uiState.value = AuthUiState.Success }
-                .onFailure { _uiState.value = AuthUiState.Error(it.message ?: "Đăng nhập thất bại") }
+                .onFailure { _uiState.value = AuthUiState.Error(toFriendlyMessage(it, "Đăng nhập thất bại")) }
         }
     }
 
-    fun signUp(email: String, password: String) {
+    fun signUp(email: String, password: String, username: String = "") {
         viewModelScope.launch {
             _uiState.value = AuthUiState.Loading
-            authRepository.signUp(email, password)
+            authRepository.signUp(email, password, username)
                 .onSuccess { _uiState.value = AuthUiState.Success }
-                .onFailure { _uiState.value = AuthUiState.Error(it.message ?: "Đăng ký thất bại") }
+                .onFailure { _uiState.value = AuthUiState.Error(toFriendlyMessage(it, "Đăng ký thất bại")) }
         }
     }
 
@@ -60,7 +60,7 @@ class AuthViewModel @Inject constructor(
             _uiState.value = AuthUiState.Loading
             authRepository.signInWithGoogle()
                 .onSuccess { _uiState.value = AuthUiState.Success }
-                .onFailure { _uiState.value = AuthUiState.Error(it.message ?: "Đăng nhập Google thất bại") }
+                .onFailure { _uiState.value = AuthUiState.Error(toFriendlyMessage(it, "Đăng nhập Google thất bại")) }
         }
     }
 
@@ -76,11 +76,39 @@ class AuthViewModel @Inject constructor(
             _uiState.value = AuthUiState.Loading
             authRepository.resetPassword(email)
                 .onSuccess { _uiState.value = AuthUiState.Success }
-                .onFailure { _uiState.value = AuthUiState.Error(it.message ?: "Gửi email thất bại") }
+                .onFailure { _uiState.value = AuthUiState.Error(toFriendlyMessage(it, "Gửi email thất bại")) }
         }
     }
 
     fun clearUiState() {
         _uiState.value = AuthUiState.Idle
+    }
+
+    /**
+     * Maps raw Supabase/network exceptions to user-friendly Vietnamese messages.
+     * Supabase-kt throws RestException with messages like:
+     * "Error Code: invalid_credentials, Message: Invalid login credentials, URL: https://..."
+     */
+    private fun toFriendlyMessage(e: Throwable, fallback: String): String {
+        val raw = e.message?.lowercase() ?: return fallback
+        return when {
+            "invalid_credentials" in raw || "invalid login" in raw || "wrong" in raw ->
+                "Email hoặc mật khẩu không đúng"
+            "email" in raw && ("taken" in raw || "already" in raw || "exists" in raw) ->
+                "Email này đã được đăng ký"
+            "user already registered" in raw ->
+                "Tài khoản đã tồn tại"
+            "password" in raw && ("short" in raw || "weak" in raw || "length" in raw || "characters" in raw) ->
+                "Mật khẩu phải có ít nhất 6 ký tự"
+            "email" in raw && ("invalid" in raw || "format" in raw || "not valid" in raw) ->
+                "Địa chỉ email không hợp lệ"
+            "network" in raw || "unable to resolve" in raw || "connect" in raw || "timeout" in raw ->
+                "Không có kết nối mạng. Vui lòng thử lại"
+            "rate limit" in raw || "too many" in raw ->
+                "Bạn thử quá nhiều lần. Vui lòng đợi vài phút"
+            "email not confirmed" in raw ->
+                "Vui lòng xác nhận email trước khi đăng nhập"
+            else -> fallback
+        }
     }
 }

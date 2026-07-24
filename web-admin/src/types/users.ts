@@ -9,7 +9,6 @@ export interface AdminUser {
   email: string | null
   avatar_url: string | null
   is_banned: boolean
-  /** No is_admin column in public schema; always false */
   is_admin: boolean
   created_at: string
   /** From user_progress.elo_score — null if no progress row yet */

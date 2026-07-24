@@ -1,5 +1,6 @@
 package com.example.vietforces.data.repository
 
+import com.example.vietforces.data.storage.PreferencesManager
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.Google
@@ -7,6 +8,8 @@ import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.auth.status.SessionStatus
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -25,7 +28,7 @@ sealed class AuthState {
 interface AuthRepository {
     val authState: Flow<AuthState>
     val currentUserId: String?
-    suspend fun signUp(email: String, password: String): Result<Unit>
+    suspend fun signUp(email: String, password: String, username: String = ""): Result<Unit>
     suspend fun signIn(email: String, password: String): Result<Unit>
     suspend fun signInWithGoogle(): Result<Unit>
     suspend fun signOut(): Result<Unit>
@@ -53,11 +56,14 @@ class AuthRepositoryImpl @Inject constructor(
     override val currentUserId: String?
         get() = supabase.auth.currentUserOrNull()?.id
 
-    override suspend fun signUp(email: String, password: String): Result<Unit> {
+    override suspend fun signUp(email: String, password: String, username: String): Result<Unit> {
         return try {
             supabase.auth.signUpWith(Email) {
                 this.email = email
                 this.password = password
+                if (username.isNotBlank()) {
+                    data = buildJsonObject { put("username", username.trim()) }
+                }
             }
             Result.success(Unit)
         } catch (e: Exception) {
@@ -89,6 +95,8 @@ class AuthRepositoryImpl @Inject constructor(
     override suspend fun signOut(): Result<Unit> {
         return try {
             supabase.auth.signOut()
+            // Clear local user data so next login starts fresh
+            PreferencesManager.clearAllData()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

@@ -23,6 +23,7 @@ export async function listUsers(
       username,
       avatar_url,
       is_banned,
+      is_admin,
       created_at,
       user_progress (
         elo_score,
@@ -51,7 +52,7 @@ export async function listUsers(
       email: null,
       avatar_url: (u.avatar_url as string | null) ?? null,
       is_banned: (u.is_banned as boolean) ?? false,
-      is_admin: false,
+      is_admin: (u.is_admin as boolean) ?? false,
       created_at: u.created_at as string,
       elo_score: (progress?.elo_score as number | null | undefined) ?? null,
       streak_count: (progress?.streak_count as number | null | undefined) ?? null,

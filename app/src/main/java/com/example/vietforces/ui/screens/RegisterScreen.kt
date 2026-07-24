@@ -37,6 +37,7 @@ fun RegisterScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     var email by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -78,6 +79,16 @@ fun RegisterScreen(
             )
 
             Spacer(modifier = Modifier.height(16.dp))
+
+            // Username field
+            OutlinedTextField(
+                value = username,
+                onValueChange = { username = it },
+                label = { Text("Tên hiển thị") },
+                placeholder = { Text("vd: ChienBinh123") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
 
             // Email field
             OutlinedTextField(
@@ -156,7 +167,7 @@ fun RegisterScreen(
                 onClick = {
                     passwordMismatch = (password != confirmPassword)
                     if (!passwordMismatch && password.length >= 6) {
-                        viewModel.signUp(email.trim(), password)
+                        viewModel.signUp(email.trim(), password, username.trim())
                     }
                 },
                 enabled = email.isNotBlank() && password.isNotBlank() && confirmPassword.isNotBlank() && uiState !is AuthUiState.Loading,
