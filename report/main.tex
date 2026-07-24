@@ -35,7 +35,6 @@
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc, fit,
                 backgrounds, decorations.pathmorphing, mindmap}
-\usepackage{pgf-umlcd}
 \usepackage[hidelinks]{hyperref}
 \usepackage{titlesec}
 \usepackage{fancyvrb}
@@ -220,7 +219,7 @@ Landing Page (Next.js) & Offline-first với complex sync \\
 
   % --- Hộp hệ thống Android App ---
   \node[system, minimum width=9.5cm, minimum height=13cm,
-        label={[font=\bfseries\small, vfgreen]above:Hệ thống VietForces (Android App)}]
+        label={[font=\bfseries\small, color=vfgreen]above:Hệ thống VietForces (Android App)}]
         (sysbox) at (4.75, -6) {};
 
   % --- Actor: Người học ---
@@ -258,14 +257,14 @@ Landing Page (Next.js) & Offline-first với complex sync \\
     \draw[ar] (learner) -- (\uc);
 
   % --- include / extend ---
-  \draw[dar] (play) -- node[above,font=\tiny]{«include»} (elo);
-  \draw[dar] (daily) -- node[above,font=\tiny]{«include»} (streak);
-  \draw[dar] (login) -- node[above,font=\tiny]{«extend»} (onboard);
-  \draw[dar] (social) -- node[above,font=\tiny]{«extend»} (profile);
+  \draw[dar] (play) -- node[above,font=\tiny]{$\ll$include$\gg$} (elo);
+  \draw[dar] (daily) -- node[above,font=\tiny]{$\ll$include$\gg$} (streak);
+  \draw[dar] (login) -- node[above,font=\tiny]{$\ll$extend$\gg$} (onboard);
+  \draw[dar] (social) -- node[above,font=\tiny]{$\ll$extend$\gg$} (profile);
 
   % --- Actor: Admin (hộp web admin riêng) ---
   \node[system, minimum width=6.5cm, minimum height=5.5cm,
-        label={[font=\bfseries\small, vfgreen]above:Web Admin Dashboard},
+        label={[font=\bfseries\small, color=vfgreen]above:Web Admin Dashboard},
         below=1.5cm of sysbox] (adminbox) at (4.75, -16) {};
 
   \node[actor] (admin) at (-1.2, -16) {Quản trị viên\\(Admin)};
@@ -277,7 +276,7 @@ Landing Page (Next.js) & Offline-first với complex sync \\
 
   \foreach \uc in {voccrud, usermgmt, analytics, sched}
     \draw[ar] (admin) -- (\uc);
-  \draw[dar] (usermgmt) -- node[right,font=\tiny]{«extend»} (ban);
+  \draw[dar] (usermgmt) -- node[right,font=\tiny]{$\ll$extend$\gg$} (ban);
 
   % --- Actor: System/Cron ---
   \node[actor, fill=vfgreen!15, draw=vfgreen] (sys) at (10.5, -5.4)
@@ -298,7 +297,7 @@ Landing Page (Next.js) & Offline-first với complex sync \\
 \endhead
 Đăng ký / Đăng nhập & Người học & Tạo tài khoản bằng email/mật khẩu hoặc Google OAuth; session tồn tại xuyên suốt app restart. \\
 \midrule
-Onboarding & Người học & Màn hình chào mừng 4 bước (Welcome → Chọn level → Đặt mục tiêu → Nhập tên/avatar) trước khi tạo tài khoản. \\
+Onboarding & Người học & Màn hình chào mừng 4 bước (Welcome $\to$ Chọn level $\to$ Đặt mục tiêu $\to$ Nhập tên/avatar) trước khi tạo tài khoản. \\
 \midrule
 Chơi game mode & Người học & Chọn 1 trong 8 chế độ chơi (xem mục~\ref{sec:gamemodes}); mỗi phiên trả về kết quả ELO được cập nhật server-side. \\
 \midrule
@@ -357,7 +356,7 @@ VietForces cung cấp 8 chế độ game học từ vựng:
 \endhead
 ELO Score & Điểm xếp hạng người chơi, được tính theo hệ thống ELO (như cờ vua). ELO tăng khi chơi đúng, giảm khi sai. Phạm vi: 0–3000. Được tính server-side bởi Supabase PostgreSQL function. \\
 \midrule
-ELO Rank Tier & Hạng được xác định dựa trên ELO: \textbf{Bronze} (<1200), \textbf{Silver} (1200–2099), \textbf{Gold} (2100–2399), \textbf{Platinum} (2400–2699), \textbf{Diamond} (≥2700). \\
+ELO Rank Tier & Hạng được xác định dựa trên ELO: \textbf{Bronze} ($<$1200), \textbf{Silver} (1200--2099), \textbf{Gold} (2100--2399), \textbf{Platinum} (2400--2699), \textbf{Diamond} ($\geq$2700). \\
 \midrule
 Streak & Chuỗi ngày liên tiếp người học đã luyện tập ít nhất 1 lần. Streak bị reset về 1 nếu bỏ lỡ 1 ngày (trừ khi dùng Streak Freeze). Tính theo múi giờ của người dùng. \\
 \midrule
@@ -475,8 +474,8 @@ và schema của Supabase database.
   \texttt{translation: String}\\
   \texttt{category: String}\\
   \texttt{imageRes: Int}\\
-  \texttt{classifiers: List<String>}\\
-  \texttt{distractors: List<String>}
+  \texttt{classifiers: List$<$String$>$}\\
+  \texttt{distractors: List$<$String$>$}
 };
 
 % ---- DailyChallenge ----
@@ -509,7 +508,7 @@ và schema của Supabase database.
 };
 
 % ---- GameMode enum ----
-\node[enh] (gmhdr) at (7.5,-0) {«enum» GameMode};
+\node[enh] (gmhdr) at (7.5,-0) {$\ll$enum$\gg$ GameMode};
 \node[enm, below=of gmhdr] (gmbody) {
   IMAGE\_TO\_WORD\\
   WORD\_TO\_IMAGE\\
@@ -522,13 +521,13 @@ và schema của Supabase database.
 };
 
 % ---- EloRank enum ----
-\node[enh, below=1cm of gmbody] (erhdr) {«enum» EloRank};
+\node[enh, below=1cm of gmbody] (erhdr) {$\ll$enum$\gg$ EloRank};
 \node[enm, below=of erhdr] (erbody) {
-  BRONZE (< 1200)\\
-  SILVER (1200–2099)\\
-  GOLD (2100–2399)\\
-  PLATINUM (2400–2699)\\
-  DIAMOND (≥ 2700)
+  BRONZE ($<$ 1200)\\
+  SILVER (1200--2099)\\
+  GOLD (2100--2399)\\
+  PLATINUM (2400--2699)\\
+  DIAMOND ($\geq$ 2700)
 };
 
 % ---- Relationships ----
@@ -824,7 +823,7 @@ Phần này sẽ hiển thị ảnh khi compile.}
       \item 8 game modes học từ vựng với 100+ từ phân loại theo 8 chủ đề.
       \item Hệ thống streak với Streak Freeze (auto-apply khi bỏ 1 ngày).
       \item Daily Challenge server-generated, đổi mỗi ngày lúc 00:00 UTC.
-      \item ELO ranking với 5 tier (Bronze → Diamond).
+      \item ELO ranking với 5 tier (Bronze $\to$ Diamond).
     \end{itemize}
 
   \item \textbf{Smart Push Notifications (FCM):}
