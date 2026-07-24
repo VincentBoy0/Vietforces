@@ -33,17 +33,13 @@
 \usepackage{subcaption}
 \usepackage{float}
 \usepackage{tikz}
-\usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc, fit,
-                backgrounds, decorations.pathmorphing, mindmap}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc, fit, backgrounds}
 \usepackage[hidelinks]{hyperref}
 \usepackage{titlesec}
-\usepackage{fancyvrb}
 \usepackage{tcolorbox}
 \tcbuselibrary{skins, breakable}
 \usepackage{array}
 \usepackage{multirow}
-\usepackage{tabularx}
-\usepackage{makecell}
 
 \onehalfspacing
 
@@ -88,9 +84,6 @@
   dar/.style={-{Latex[length=2.5mm]}, dashed, thick, vfgray},
 }
 
-\fvset{frame=single, framerule=0.4pt, rulecolor=\color{boxframe},
-  fontsize=\footnotesize, breaklines=true, xleftmargin=4pt, xrightmargin=4pt}
-
 % =====================================================================
 \begin{document}
 
@@ -134,6 +127,7 @@
 \end{titlepage}
 
 \tableofcontents
+\listoffigures
 \newpage
 
 % =====================================================================
@@ -156,7 +150,7 @@ thực tế.
 \subsection{Vấn đề cần giải quyết}
 
 \begin{tcolorbox}[colback=boxbg, colframe=vfred, title={\textbf{Bài toán chính}},
-  fonttitle=\bfseries, rounded corners]
+  fonttitle=\bfseries, arc=4pt]
 Xây dựng một ứng dụng học từ vựng tiếng Việt trên nền tảng Android có khả năng:
 \begin{enumerate}
   \item Tạo trải nghiệm học thú vị thông qua nhiều game modes đa dạng.
@@ -264,8 +258,8 @@ Landing Page (Next.js) & Offline-first với complex sync \\
 
   % --- Actor: Admin (hộp web admin riêng) ---
   \node[system, minimum width=6.5cm, minimum height=5.5cm,
-        label={[font=\bfseries\small, color=vfgreen]above:Web Admin Dashboard},
-        below=1.5cm of sysbox] (adminbox) at (4.75, -16) {};
+        label={[font=\bfseries\small, color=vfgreen]above:Web Admin Dashboard}]
+        (adminbox) at (4.75, -16) {};
 
   \node[actor] (admin) at (-1.2, -16) {Quản trị viên\\(Admin)};
   \node[usecase] (voccrud) at (3.5, -14.5) {Quản lý từ vựng\\(CRUD + ảnh)};
@@ -286,6 +280,7 @@ Landing Page (Next.js) & Offline-first với complex sync \\
 
 \end{tikzpicture}
 \caption{Sơ đồ Use Case tổng thể của hệ thống VietForces.}
+\label{fig:usecase}
 \end{figure}
 
 \subsection{Mô tả chi tiết các Use Case chính}
@@ -437,8 +432,6 @@ và schema của Supabase database.
   enh/.style={rectangle, draw=vforange, thick, fill=vforange!20,
     text width=3.8cm, align=center, font=\footnotesize\bfseries,
     minimum height=0.65cm},
-  comp/.style={-diamond, thick},
-  agg/.style={-open diamond, thick},
   ass/.style={-{Latex[length=2mm]}, thick},
   node distance=0.0cm
 ]
@@ -539,6 +532,7 @@ và schema của Supabase database.
 
 \end{tikzpicture}
 \caption{Domain model chính của VietForces (Android data models + Supabase schema).}
+\label{fig:classdiagram}
 \end{figure}
 
 \subsection{Kiến trúc lớp Android (Layer Diagram)}
@@ -567,6 +561,7 @@ và schema của Supabase database.
   \draw[ar] (mgr)  -- (supa);
 \end{tikzpicture}
 \caption{Kiến trúc phân lớp của Android app (MVVM + Repository + Hilt).}
+\label{fig:layers}
 \end{figure}
 
 % =====================================================================
@@ -605,6 +600,7 @@ VietForces là hệ thống đa nền tảng gồm 4 thành phần chia sẻ m�
   \draw[ar] (supabase) -- (fcm);
 \end{tikzpicture}
 \caption{Kiến trúc tổng thể hệ thống VietForces.}
+\label{fig:arch}
 \end{figure}
 
 \subsection{Android App — MVVM + Repository}
@@ -696,6 +692,7 @@ call AI only when necessary''} để giữ app nhanh và tiết kiệm chi phí.
   \draw[ar] (mgr) -- (pref);
 \end{tikzpicture}
 \caption{Kiến trúc AI layer — Android App $\rightarrow$ Edge Function Proxy $\rightarrow$ OpenAI.}
+\label{fig:ai}
 \end{figure}
 
 \subsection{5 tính năng AI}

@@ -13,7 +13,7 @@
   \usepackage{lmodern}
 \else
   \usepackage{fontspec}
-  \setmainfont{Arial}[BoldFont={Arial Bold}]
+  \setmainfont{TeX Gyre Heros}[BoldFont={TeX Gyre Heros Bold}]
   \setmonofont{DejaVu Sans Mono}[Scale=0.78]
 \fi
 
@@ -58,11 +58,6 @@
   colback=vfred, colframe=vfred,
   left=6pt, right=6pt, top=6pt, bottom=6pt
 ]
-\begin{tikzpicture}[overlay, remember picture]
-  % decorative circles
-  \fill[vfred!70, opacity=0.5] (-1, 0.4) circle (1.8cm);
-  \fill[white, opacity=0.05] (18, -0.2) circle (2.5cm);
-\end{tikzpicture}
 \noindent
 \begin{minipage}[c]{0.18\linewidth}
   \centering
@@ -97,7 +92,7 @@
 
 % --- Mục tiêu / Goal ---
 \begin{tcolorbox}[enhanced, arc=3pt, colback=vflightred, colframe=vfred,
-  title={\textcolor{white}{\textbf{🎯  Mục tiêu đề tài}}}, fonttitle=\small\bfseries,
+  title={\textcolor{white}{\textbf{Mục tiêu đề tài}}}, fonttitle=\small\bfseries,
   coltitle=white, attach boxed title to top left={yshift=-2mm, xshift=4mm},
   boxed title style={colback=vfred, arc=2pt},
   left=6pt, right=6pt, top=8pt, bottom=4pt]
@@ -118,7 +113,7 @@
 
 % --- Tech Stack ---
 \begin{tcolorbox}[enhanced, arc=3pt, colback=vflightblue, colframe=vfblue,
-  title={\textcolor{white}{\textbf{🛠  Tech Stack}}}, fonttitle=\small\bfseries,
+  title={\textcolor{white}{\textbf{Tech Stack}}}, fonttitle=\small\bfseries,
   coltitle=white, attach boxed title to top left={yshift=-2mm, xshift=4mm},
   boxed title style={colback=vfblue, arc=2pt},
   left=6pt, right=6pt, top=8pt, bottom=4pt]
@@ -145,8 +140,8 @@
   raster equal height=rows]
 
 \begin{tcolorbox}[enhanced, arc=3pt, colback=vflightred, colframe=vfred,
-  fonttitle=\footnotesize\bfseries\color{white}, coltitle=white,
-  title={🎮 8 Game Modes},
+  fonttitle=\footnotesize\bfseries, coltitle=white,
+  title={8 Game Modes},
   attach boxed title to top left={yshift=-2mm, xshift=3mm},
   boxed title style={colback=vfred, arc=2pt},
   left=5pt, right=5pt, top=7pt, bottom=4pt]
@@ -163,8 +158,8 @@
 \end{tcolorbox}
 
 \begin{tcolorbox}[enhanced, arc=3pt, colback=vflightorange, colframe=vforange,
-  fonttitle=\footnotesize\bfseries\color{white}, coltitle=white,
-  title={🤖 AI Features},
+  fonttitle=\footnotesize\bfseries, coltitle=white,
+  title={AI Features},
   attach boxed title to top left={yshift=-2mm, xshift=3mm},
   boxed title style={colback=vforange, arc=2pt},
   left=5pt, right=5pt, top=7pt, bottom=4pt]
@@ -182,8 +177,8 @@ $\bullet$ \textbf{Roleplay Tutor}\\
 \end{tcolorbox}
 
 \begin{tcolorbox}[enhanced, arc=3pt, colback=vflightgreen, colframe=vfgreen,
-  fonttitle=\footnotesize\bfseries\color{white}, coltitle=white,
-  title={🏆 Gamification},
+  fonttitle=\footnotesize\bfseries, coltitle=white,
+  title={Gamification},
   attach boxed title to top left={yshift=-2mm, xshift=3mm},
   boxed title style={colback=vfgreen, arc=2pt},
   left=5pt, right=5pt, top=7pt, bottom=4pt]
@@ -202,8 +197,8 @@ Real-time (Supabase Realtime)}
 \end{tcolorbox}
 
 \begin{tcolorbox}[enhanced, arc=3pt, colback=vflightblue, colframe=vfblue,
-  fonttitle=\footnotesize\bfseries\color{white}, coltitle=white,
-  title={🔒 Security \& Quality},
+  fonttitle=\footnotesize\bfseries, coltitle=white,
+  title={Security \& Quality},
   attach boxed title to top left={yshift=-2mm, xshift=3mm},
   boxed title style={colback=vfblue, arc=2pt},
   left=5pt, right=5pt, top=7pt, bottom=4pt]
@@ -233,7 +228,7 @@ MVVM + Repository + Hilt DI}
 
 % --- Architecture diagram ---
 \begin{tcolorbox}[enhanced, arc=3pt, colback=white, colframe=vfgray!50,
-  title={\small\textbf{⚙️  Kiến trúc hệ thống}}, fonttitle=\small\bfseries,
+  title={\small\textbf{Kiến trúc hệ thống}}, fonttitle=\small\bfseries,
   left=4pt, right=4pt, top=6pt, bottom=4pt]
 \centering
 \begin{tikzpicture}[scale=0.72, transform shape, node distance=0.35cm]
@@ -259,7 +254,7 @@ MVVM + Repository + Hilt DI}
 
 % --- Social Features ---
 \begin{tcolorbox}[enhanced, arc=3pt, colback=vflightorange, colframe=vforange,
-  title={\small\textbf{👥  Social Features}}, fonttitle=\small\bfseries\color{white},
+  title={\small\textbf{Social Features}}, fonttitle=\small\bfseries, coltitle=white,
   coltitle=white, attach boxed title to top left={yshift=-2mm, xshift=4mm},
   boxed title style={colback=vforange, arc=2pt},
   left=5pt, right=5pt, top=8pt, bottom=4pt]
@@ -276,7 +271,7 @@ MVVM + Repository + Hilt DI}
 
 % --- Admin + Deploy ---
 \begin{tcolorbox}[enhanced, arc=3pt, colback=vflightblue, colframe=vfblue,
-  title={\small\textbf{🖥  Web Admin Dashboard}}, fonttitle=\small\bfseries\color{white},
+  title={\small\textbf{Web Admin Dashboard}}, fonttitle=\small\bfseries, coltitle=white,
   coltitle=white, attach boxed title to top left={yshift=-2mm, xshift=4mm},
   boxed title style={colback=vfblue, arc=2pt},
   left=5pt, right=5pt, top=8pt, bottom=4pt]
