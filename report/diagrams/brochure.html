@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VietForces — Tờ rơi A4</title>
+<style>
+  /* ── Reset & Page Setup ─────────────────────────────── */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #e0e0e0;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  /* A4 dimensions: 210mm × 297mm ≈ 794px × 1123px at 96dpi */
+  .page {
+    width: 794px;
+    min-height: 1123px;
+    background: #fff;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  /* ── Print styles ───────────────────────────────────── */
+  @media print {
+    body { background: white; padding: 0; }
+    .page {
+      width: 210mm; min-height: 297mm;
+      box-shadow: none; margin: 0;
+    }
+    @page { size: A4; margin: 0; }
+  }
+
+  /* ── Colour variables ───────────────────────────────── */
+  :root {
+    --red:    #C62828; --lred:    #FFEBEE;
+    --blue:   #1565C0; --lblue:   #E3F2FD;
+    --green:  #2E7D32; --lgreen:  #E8F5E9;
+    --orange: #E65100; --lorange: #FFF3E0;
+    --gray:   #424242; --lgray:   #F5F5F5;
+  }
+
+  /* ── HEADER ─────────────────────────────────────────── */
+  .header {
+    background: var(--red);
+    color: white;
+    padding: 14px 20px 12px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .logo {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 900; color: var(--red);
+    flex-shrink: 0;
+  }
+  .header-text h1 {
+    font-size: 26px; font-weight: 900; letter-spacing: 1px;
+    line-height: 1.1;
+  }
+  .header-text .tagline {
+    font-size: 13px; opacity: 0.9; margin-top: 3px;
+  }
+  .header-text .sub {
+    font-size: 11px; opacity: 0.75; margin-top: 4px;
+  }
+  .header-badge {
+    margin-left: auto;
+    background: rgba(255,255,255,0.18);
+    border-radius: 8px;
+    padding: 8px 14px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .header-badge .team { font-size: 12px; font-weight: 700; }
+  .header-badge .uni  { font-size: 10px; opacity: 0.8; margin-top: 3px; }
+
+  /* ── Main content area ──────────────────────────────── */
+  .content {
+    flex: 1;
+    padding: 10px 14px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  /* ── Row layouts ────────────────────────────────────── */
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .row-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; }
+
+  /* ── Card ───────────────────────────────────────────── */
+  .card {
+    border-radius: 8px;
+    border-width: 1.5px;
+    border-style: solid;
+    padding: 0;
+    overflow: hidden;
+    font-size: 11px;
+  }
+  .card-header {
+    padding: 5px 10px;
+    font-weight: 700;
+    font-size: 11.5px;
+    color: white;
+  }
+  .card-body { padding: 8px 10px; color: var(--gray); }
+  .card-body ul { padding-left: 14px; }
+  .card-body li { margin-bottom: 3px; line-height: 1.35; }
+  .card-body p  { margin-bottom: 4px; line-height: 1.4; }
+
+  /* ── Card colour themes ─────────────────────────────── */
+  .red    { border-color: var(--red);    background: var(--lred); }
+  .blue   { border-color: var(--blue);   background: var(--lblue); }
+  .green  { border-color: var(--green);  background: var(--lgreen); }
+  .orange { border-color: var(--orange); background: var(--lorange); }
+  .gray   { border-color: #90A4AE;       background: #ECEFF1; }
+
+  .red    .card-header { background: var(--red); }
+  .blue   .card-header { background: var(--blue); }
+  .green  .card-header { background: var(--green); }
+  .orange .card-header { background: var(--orange); }
+  .gray   .card-header { background: #546E7A; }
+
+  /* ── Feature tag pills ──────────────────────────────── */
+  .pill {
+    display: inline-block;
+    border-radius: 12px;
+    padding: 2px 9px;
+    font-size: 10px;
+    font-weight: 700;
+    color: white;
+    margin: 2px 2px 2px 0;
+  }
+  .pill.red    { background: var(--red); }
+  .pill.blue   { background: var(--blue); }
+  .pill.green  { background: var(--green); }
+  .pill.orange { background: var(--orange); }
+  .pill.pink   { background: #C2185B; }
+
+  /* ── Architecture mini-diagram ──────────────────────── */
+  .arch-diagram {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: center;
+  }
+  .arch-row {
+    display: flex; gap: 5px; justify-content: center;
+  }
+  .arch-box {
+    border-radius: 5px;
+    padding: 4px 8px;
+    font-size: 9.5px;
+    font-weight: 600;
+    text-align: center;
+    color: white;
+    line-height: 1.3;
+  }
+  .arch-arrow { text-align: center; color: #888; font-size: 14px; line-height: 1; }
+
+  /* ── Table ──────────────────────────────────────────── */
+  .tbl { width: 100%; border-collapse: collapse; font-size: 10px; }
+  .tbl td { padding: 3px 6px; border-bottom: 1px solid #ddd; vertical-align: top; }
+  .tbl td:first-child { font-weight: 700; white-space: nowrap; color: var(--gray); }
+
+  /* ── Highlight text ─────────────────────────────────── */
+  .hl-red    { color: var(--red);    font-weight: 700; }
+  .hl-blue   { color: var(--blue);   font-weight: 700; }
+  .hl-green  { color: var(--green);  font-weight: 700; }
+  .hl-orange { color: var(--orange); font-weight: 700; }
+
+  /* ── FOOTER ─────────────────────────────────────────── */
+  .footer {
+    background: var(--gray);
+    color: white;
+    padding: 8px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 10px;
+  }
+  .footer-pills { display: flex; gap: 4px; }
+  .footer-pill {
+    border-radius: 4px; padding: 2px 8px;
+    font-size: 9.5px; font-weight: 700; color: white;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ══ HEADER ══════════════════════════════════════════════════ -->
+  <div class="header">
+    <div class="logo">VF</div>
+    <div class="header-text">
+      <h1>VietForces</h1>
+      <div class="tagline">Học tiếng Việt qua trò chơi — có AI đồng hành</div>
+      <div class="sub">
+        Android App &nbsp;·&nbsp; Web Admin &nbsp;·&nbsp;
+        AI Powered (OpenAI) &nbsp;·&nbsp; Real-time Leaderboard &nbsp;·&nbsp; Supabase Backend
+      </div>
+    </div>
+    <div class="header-badge">
+      <div class="team">Bao · An · Hùng Cường</div>
+      <div class="uni">Đồ án Tốt nghiệp</div>
+      <div class="uni">KHTN — ĐHQG TP.HCM</div>
+    </div>
+  </div>
+
+  <!-- ══ CONTENT ═════════════════════════════════════════════════ -->
+  <div class="content">
+
+    <!-- ROW 1: Goal + Tech Stack -->
+    <div class="row-2">
+
+      <!-- Goal -->
+      <div class="card red">
+        <div class="card-header">Mục tiêu đề tài</div>
+        <div class="card-body">
+          <p><strong>Vấn đề:</strong> Thiếu ứng dụng học tiếng Việt có gamification,
+          AI cá nhân hoá, và cộng đồng người học.</p>
+          <p><strong>Giải pháp:</strong> Hệ thống học từ vựng đa nền tảng gồm:</p>
+          <ul>
+            <li>8 game modes tương tác (100+ từ / 8 chủ đề)</li>
+            <li>AI (LLM) luyện hội thoại thực tế &amp; chấm bài</li>
+            <li>Streak + ELO + Daily Challenge duy trì thói quen học</li>
+            <li>Leaderboard real-time &amp; social features</li>
+            <li>Web Admin Dashboard + Landing Page đi kèm</li>
+          </ul>
+          <p style="margin-top:5px">
+            <strong>Đối tượng:</strong> Người học tiếng Việt (nước ngoài, trẻ em)
+            &amp; quản trị viên nội dung.
+          </p>
+        </div>
+      </div>
+
+      <!-- Tech Stack -->
+      <div class="card blue">
+        <div class="card-header">Tech Stack</div>
+        <div class="card-body">
+          <table class="tbl">
+            <tr><td>Android</td>
+                <td>Kotlin 2.0 · Jetpack Compose · Hilt DI · Supabase SDK 3.7</td></tr>
+            <tr><td>Backend</td>
+                <td>Supabase (PostgreSQL + Auth + Realtime + Storage)</td></tr>
+            <tr><td>Edge Fn</td>
+                <td>Deno (TypeScript) · 4 functions · pg_cron jobs</td></tr>
+            <tr><td>Web</td>
+                <td>Next.js 15 App Router · TypeScript · Tailwind CSS</td></tr>
+            <tr><td>AI</td>
+                <td>OpenAI <strong>gpt-4o-mini</strong> via Edge Function proxy</td></tr>
+            <tr><td>Notif</td>
+                <td>Firebase Cloud Messaging (FCM)</td></tr>
+            <tr><td>Deploy</td>
+                <td>Vercel (Web) · Supabase Cloud</td></tr>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ROW 2: 4 Feature Boxes -->
+    <div class="row-4">
+
+      <!-- Game Modes -->
+      <div class="card red">
+        <div class="card-header">8 Game Modes</div>
+        <div class="card-body">
+          <ul style="padding-left:12px">
+            <li><strong>1.</strong> ImageToWord</li>
+            <li><strong>2.</strong> WordToImage</li>
+            <li><strong>3.</strong> SyllableMatch</li>
+            <li><strong>4.</strong> WordSearch</li>
+            <li><strong>5.</strong> FillBlank</li>
+            <li><strong>6.</strong> WordChain</li>
+            <li><strong>7.</strong> SentenceOrder</li>
+            <li><strong>8.</strong> Writing Practice</li>
+          </ul>
+          <p style="margin-top:5px; font-style:italic">
+            100+ từ / 8 chủ đề
+          </p>
+        </div>
+      </div>
+
+      <!-- AI Features -->
+      <div class="card orange">
+        <div class="card-header">AI Features</div>
+        <div class="card-body">
+          <p class="hl-orange">5 tính năng AI:</p>
+          <ul style="padding-left:12px; margin-top:4px">
+            <li>Writing Grading<br>
+              <span style="font-style:italic;font-size:10px">chấm + viết lại</span></li>
+            <li>Open-answer Grading<br>
+              <span style="font-style:italic;font-size:10px">chấp nhận sai dấu</span></li>
+            <li>Mascot Reactions</li>
+            <li>Learning Path<br>
+              <span style="font-style:italic;font-size:10px">phân tích điểm yếu</span></li>
+            <li><strong>Roleplay Tutor ★</strong><br>
+              <span style="font-style:italic;font-size:10px">15 tình huống thực tế</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Gamification -->
+      <div class="card green">
+        <div class="card-header">Gamification</div>
+        <div class="card-body">
+          <p class="hl-green">ELO Ranking:</p>
+          <p style="font-size:10px; margin-bottom:5px">
+            Bronze → Silver → Gold → Platinum → Diamond
+          </p>
+          <p class="hl-green">Streak System:</p>
+          <p style="font-size:10px; margin-bottom:5px">
+            + Streak Freeze tự động<br>
+            + Streak Reminder (FCM)
+          </p>
+          <p class="hl-green">Daily Challenge:</p>
+          <p style="font-size:10px; margin-bottom:5px">
+            Server-generated 00:00 UTC<br>
+            +50 ELO bonus
+          </p>
+          <p class="hl-green">Leaderboard:</p>
+          <p style="font-size:10px">Real-time (Supabase Realtime)</p>
+        </div>
+      </div>
+
+      <!-- Security -->
+      <div class="card blue">
+        <div class="card-header">Security &amp; Quality</div>
+        <div class="card-body">
+          <p class="hl-blue">RLS on all tables:</p>
+          <p style="font-size:10px; margin-bottom:4px">User chỉ đọc/ghi data của mình</p>
+          <p class="hl-blue">SECURITY DEFINER:</p>
+          <p style="font-size:10px; margin-bottom:4px">ELO server-side, auth.uid() check</p>
+          <p class="hl-blue">API key safe:</p>
+          <p style="font-size:10px; margin-bottom:4px">OpenAI key ở Supabase env vars</p>
+          <p class="hl-blue">Graceful fallback:</p>
+          <p style="font-size:10px; margin-bottom:4px">App chạy được dù AI lỗi</p>
+          <p class="hl-blue">Architecture:</p>
+          <p style="font-size:10px">MVVM + Repository + Hilt DI</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ROW 3: Architecture + Social + Admin -->
+    <div class="row-3">
+
+      <!-- Architecture Diagram -->
+      <div class="card gray">
+        <div class="card-header">Kiến trúc hệ thống</div>
+        <div class="card-body">
+          <div class="arch-diagram">
+            <div class="arch-row">
+              <div class="arch-box" style="background:var(--red)">Android App<br>Kotlin/Compose</div>
+              <div class="arch-box" style="background:var(--blue)">Web Admin<br>Next.js 15</div>
+              <div class="arch-box" style="background:var(--green)">Landing<br>Next.js 15</div>
+            </div>
+            <div class="arch-arrow">↓ ↓ ↓</div>
+            <div class="arch-row">
+              <div class="arch-box" style="background:var(--orange); padding: 6px 12px">
+                Supabase: PostgreSQL + Auth + Realtime + Storage
+              </div>
+            </div>
+            <div class="arch-arrow">↓ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↓</div>
+            <div class="arch-row">
+              <div class="arch-box" style="background:var(--red)">OpenAI<br>gpt-4o-mini</div>
+              <div class="arch-box" style="background:var(--blue)">Firebase<br>FCM</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Social Features -->
+      <div class="card orange">
+        <div class="card-header">Social Features</div>
+        <div class="card-body">
+          <ul>
+            <li>Asymmetric follow (như Twitter)</li>
+            <li>Friends tab trong Leaderboard</li>
+            <li>Activity feed bạn bè</li>
+            <li>Xem public profile người khác</li>
+            <li>Search user theo username</li>
+          </ul>
+          <div style="margin-top:8px">
+            <span class="pill pink">Follow System</span>
+            <span class="pill orange">Activity Feed</span>
+            <span class="pill red">Leaderboard</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admin + Deploy -->
+      <div class="card blue">
+        <div class="card-header">Web Admin Dashboard</div>
+        <div class="card-body">
+          <ul>
+            <li>Vocabulary CRUD + image upload</li>
+            <li>User management (ban/unban)</li>
+            <li>Analytics: DAU, retention</li>
+            <li>Daily challenge scheduling</li>
+            <li>Deploy trên <strong>Vercel</strong></li>
+          </ul>
+          <div style="margin-top:8px">
+            <span class="pill blue">Next.js 15</span>
+            <span class="pill green">Vercel</span>
+            <span class="pill orange">Supabase</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ROW 4: Advanced Features highlight bar -->
+    <div class="card" style="border-color:var(--red); background:var(--lred); border-radius:8px">
+      <div class="card-header" style="background:var(--red)">
+        Tính năng nổi bật (Advanced Features)
+      </div>
+      <div class="card-body" style="display:flex; flex-wrap:wrap; gap:6px; padding:8px 10px">
+        <span class="pill pink">OpenAI gpt-4o-mini</span>
+        <span class="pill orange">5 AI Features</span>
+        <span class="pill red">Server-authoritative ELO</span>
+        <span class="pill blue">Supabase Realtime WebSocket</span>
+        <span class="pill green">SECURITY DEFINER Functions</span>
+        <span class="pill orange">pg_cron Daily Challenge</span>
+        <span class="pill blue">FCM Smart Notifications</span>
+        <span class="pill green">Streak Freeze System</span>
+        <span class="pill red">AI Roleplay (15 tình huống)</span>
+        <span class="pill blue">MVVM + Hilt DI</span>
+        <span class="pill orange">RLS on 10 tables</span>
+        <span class="pill green">Vercel + Supabase Cloud Deploy</span>
+      </div>
+    </div>
+
+  </div><!-- end .content -->
+
+  <!-- ══ FOOTER ══════════════════════════════════════════════════ -->
+  <div class="footer">
+    <div>
+      <strong>VietForces</strong> — Gamified Vietnamese Learning App<br>
+      <span style="opacity:0.8; font-size:9.5px">
+        Đồ án Tốt nghiệp · Bao, An, Hùng Cường · Trường ĐH KHTN – ĐHQG TP.HCM
+      </span>
+    </div>
+    <div class="footer-pills">
+      <div class="footer-pill" style="background:var(--red)">Android</div>
+      <div class="footer-pill" style="background:var(--blue)">Web</div>
+      <div class="footer-pill" style="background:var(--orange)">AI</div>
+      <div class="footer-pill" style="background:var(--green)">Realtime</div>
+    </div>
+    <div style="text-align:right; font-size:9.5px; opacity:0.85">
+      github.com/tranthebaobnnn-ai/vietforces<br>
+      <span style="opacity:0.7">In theo khổ A4 từ trình duyệt: Ctrl+P → A4</span>
+    </div>
+  </div>
+
+</div><!-- end .page -->
+</body>
+</html>
