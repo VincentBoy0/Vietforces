@@ -1,243 +1,265 @@
-# Codebase Structure
+# Directory Structure
 
-**Analysis Date:** 2026-07-22
+**Analysis Date:** 2026-07-24
 
-## Directory Layout
+## Root Layout
 
 ```
 vietforces/
-├── app/
-│   ├── src/
-│   │   └── main/
-│   │       ├── java/com/example/vietforces/
-│   │       │   ├── MainActivity.kt               # App entry point + NavHost
-│   │       │   ├── navigation/
-│   │       │   │   └── Screen.kt                 # Sealed class: all nav routes
-│   │       │   ├── data/
-│   │       │   │   ├── manager/                  # Singleton business-logic objects
-│   │       │   │   │   ├── AiManager.kt
-│   │       │   │   │   ├── EncounteredItemsManager.kt
-│   │       │   │   │   ├── NotificationManager.kt
-│   │       │   │   │   ├── ProfileManager.kt
-│   │       │   │   │   ├── SettingsManager.kt
-│   │       │   │   │   └── UserProgressManager.kt
-│   │       │   │   ├── model/                    # Domain data classes + enums
-│   │       │   │   │   ├── AiModels.kt
-│   │       │   │   │   ├── EloRank.kt
-│   │       │   │   │   ├── GameMode.kt
-│   │       │   │   │   ├── RoleplayScenario.kt
-│   │       │   │   │   ├── UserSession.kt
-│   │       │   │   │   └── VocabularyItem.kt
-│   │       │   │   ├── remote/                   # OpenAI HTTP client
-│   │       │   │   │   └── OpenAiClient.kt
-│   │       │   │   ├── repository/               # In-memory vocabulary dataset
-│   │       │   │   │   └── VocabularyRepository.kt
-│   │       │   │   └── storage/                  # SharedPreferences facade
-│   │       │   │       └── PreferencesManager.kt
-│   │       │   └── ui/
-│   │       │       ├── components/               # Reusable Compose components
-│   │       │       │   ├── BottomNavigation.kt
-│   │       │       │   ├── DraggableMascot.kt    # Also contains MascotFeedbackManager
-│   │       │       │   ├── GameModeCard.kt
-│   │       │       │   └── RoosterMascot.kt
-│   │       │       ├── screens/                  # Top-level screen composables
-│   │       │       │   ├── LearningPathScreen.kt
-│   │       │       │   ├── MainScreen.kt
-│   │       │       │   ├── NotificationScreen.kt
-│   │       │       │   ├── PerformanceScreen.kt
-│   │       │       │   ├── PlaceholderScreens.kt
-│   │       │       │   ├── ProfileScreen.kt
-│   │       │       │   ├── RoleplayScreen.kt
-│   │       │       │   ├── SettingsScreen.kt
-│   │       │       │   ├── WritingPracticeScreen.kt
-│   │       │       │   └── game/                 # One file per game mode
-│   │       │       │       ├── FillBlankScreen.kt
-│   │       │       │       ├── GameCommonScreens.kt   # DifficultySelectionScreen, GameOverScreen
-│   │       │       │       ├── ImageToWordScreen.kt
-│   │       │       │       ├── SentenceOrderScreen.kt
-│   │       │       │       ├── SyllableMatchScreen.kt
-│   │       │       │       ├── WordChainScreen.kt
-│   │       │       │       ├── WordSearchScreen.kt
-│   │       │       │       └── WordToImageScreen.kt
-│   │       │       └── theme/
-│   │       │           ├── Color.kt              # Brand + game-mode colors
-│   │       │           ├── Theme.kt              # VietforcesTheme (Material3)
-│   │       │           └── Type.kt               # Typography
-│   │       ├── res/
-│   │       │   ├── drawable/                     # ~100 vocabulary images
-│   │       │   │   ├── animal_001.jpg … animal_020.jpg
-│   │       │   │   ├── body_001.jpg … body_002.jpg
-│   │       │   │   ├── clothing_001.jpg … clothing_009.jpg
-│   │       │   │   ├── food_001.png … food_020.jpg
-│   │       │   │   ├── household_001.jpg … household_013.jpg
-│   │       │   │   ├── kitchen_001.jpg … kitchen_012.jpg
-│   │       │   │   ├── place_001.jpg … place_015.jpg
-│   │       │   │   ├── school_001.jpg … school_012.jpg
-│   │       │   │   ├── vehicle_001.jpeg … vehicle_006.jpg
-│   │       │   │   └── ic_launcher_*.xml
-│   │       │   ├── mipmap-*/                     # Launcher icons (hdpi→xxxhdpi)
-│   │       │   ├── values/
-│   │       │   │   ├── colors.xml
-│   │       │   │   ├── strings.xml
-│   │       │   │   └── themes.xml
-│   │       │   └── xml/
-│   │       │       ├── backup_rules.xml
-│   │       │       └── data_extraction_rules.xml
-│   │       └── AndroidManifest.xml
-│   └── build.gradle.kts
-├── build.gradle.kts
-├── gradle.properties
-├── settings.gradle.kts
-└── gradlew / gradlew.bat
+├── app/                    # Android application (Kotlin, Jetpack Compose)
+├── web-admin/              # Next.js 15 admin dashboard (TypeScript)
+├── web-landing/            # Next.js 15 marketing landing page (TypeScript)
+├── supabase/               # Backend: Supabase migrations + Edge Functions
+├── .planning/              # GSD planning documents (phases, codebase maps)
+├── .github/                # GitHub Actions workflows
+├── build.gradle.kts        # Root Gradle build script
+├── settings.gradle.kts     # Gradle settings (module declarations)
+├── gradle.properties       # Gradle JVM / project-wide flags
+├── local.properties        # Git-ignored: SUPABASE_URL, SUPABASE_ANON_KEY, OPENAI_API_KEY
+├── gradlew / gradlew.bat   # Gradle wrapper scripts
+└── README.md               # Project overview
 ```
 
-## Directory Purposes
+## Android App (`app/`)
 
-**`data/manager/`:**
-- Purpose: All application business logic; Kotlin `object` singletons that hold reactive state
-- Contains: Progress tracking, AI orchestration, settings, profile, notifications, spaced-repetition
-- Key files: `UserProgressManager.kt` (Elo/streaks), `AiManager.kt` (all AI feature calls), `EncounteredItemsManager.kt` (spaced repetition weights)
+```
+app/
+├── build.gradle.kts        # App-level build config; reads local.properties into BuildConfig
+└── src/
+    ├── main/
+    │   ├── AndroidManifest.xml
+    │   ├── java/com/example/vietforces/
+    │   │   ├── MainActivity.kt               # Single Activity; NavHost + auth gate
+    │   │   ├── VietForcesApplication.kt      # @HiltAndroidApp; WorkManager setup
+    │   │   ├── VietForcesFirebaseMessagingService.kt  # FCM token + push handler
+    │   │   ├── data/
+    │   │   │   ├── manager/                  # Singleton in-memory state (SharedPrefs-backed)
+    │   │   │   │   ├── AiManager.kt          # OpenAI conversation state
+    │   │   │   │   ├── EncounteredItemsManager.kt  # Words seen in session
+    │   │   │   │   ├── FCMTokenManager.kt    # FCM token cache + upload
+    │   │   │   │   ├── NotificationManager.kt # Notification pref cache
+    │   │   │   │   ├── ProfileManager.kt     # Username / avatar cache
+    │   │   │   │   ├── SettingsManager.kt    # App settings (timezone, theme)
+    │   │   │   │   └── UserProgressManager.kt  # ELO / streak local cache
+    │   │   │   ├── model/                    # Pure data classes
+    │   │   │   │   ├── AiModels.kt           # OpenAI request/response DTOs
+    │   │   │   │   ├── EloRank.kt            # Rank tier enum (Newbie → Legendary GM)
+    │   │   │   │   ├── GameMode.kt           # GameMode sealed class / enum
+    │   │   │   │   ├── RoleplayScenario.kt   # AI roleplay scenario data
+    │   │   │   │   ├── UserProgressDto.kt    # Supabase user_progress row DTO
+    │   │   │   │   ├── UserSession.kt        # Current session state
+    │   │   │   │   └── VocabularyItem.kt     # Word data class (id, word, classifier, drawableId)
+    │   │   │   ├── remote/                   # Network clients
+    │   │   │   │   ├── OpenAiClient.kt       # HTTP client for openai-proxy Edge Function
+    │   │   │   │   └── RemoteProgressSource.kt  # Supabase Postgrest calls for progress sync
+    │   │   │   ├── repository/               # Domain repositories (interface + impl)
+    │   │   │   │   ├── AuthRepository.kt     # signIn / signUp / signOut / authState Flow
+    │   │   │   │   ├── DailyChallengeRepository.kt  # Fetch today's challenge; award bonus
+    │   │   │   │   ├── EloRepository.kt      # calculate_elo RPC wrapper
+    │   │   │   │   ├── LeaderboardRepository.kt     # Global + weekly leaderboard queries
+    │   │   │   │   ├── ProgressRepository.kt # Cloud progress sync (upsert / fetch)
+    │   │   │   │   ├── SocialRepository.kt   # Follow / unfollow / search users
+    │   │   │   │   ├── StreakRepository.kt   # update_streak RPC; streak history
+    │   │   │   │   └── VocabularyRepository.kt  # Hardcoded 154-word list (object singleton)
+    │   │   │   ├── service/
+    │   │   │   │   └── MigrationService.kt   # One-time data migration at app start
+    │   │   │   ├── storage/
+    │   │   │   │   └── PreferencesManager.kt # SharedPreferences wrapper; init in Application
+    │   │   │   └── worker/
+    │   │   │       └── StreakDangerWorker.kt  # Hourly WorkManager job: streak danger alert
+    │   │   ├── di/                           # Hilt dependency injection modules
+    │   │   │   ├── AuthModule.kt             # Binds AuthRepositoryImpl → AuthRepository
+    │   │   │   ├── GameModule.kt             # Game-scoped dependencies
+    │   │   │   ├── RepositoryModule.kt       # Placeholder (auto-bound via @Inject)
+    │   │   │   └── SupabaseModule.kt         # Singleton SupabaseClient (Auth+Postgrest+Realtime+Storage)
+    │   │   ├── navigation/
+    │   │   │   └── Screen.kt                 # Sealed class: 26 named routes
+    │   │   └── ui/
+    │   │       ├── components/               # Reusable Composables
+    │   │       │   ├── BottomNavigation.kt   # Bottom nav bar (Main/Leaderboard/Profile/Settings)
+    │   │       │   ├── DraggableMascot.kt    # Floating draggable rooster mascot
+    │   │       │   ├── GameModeCard.kt       # Game mode selection card
+    │   │       │   ├── RoosterMascot.kt      # Static rooster asset composable
+    │   │       │   ├── StreakHeatmapComposable.kt  # GitHub-style streak heatmap
+    │   │       │   └── UiComponents.kt       # Shared buttons, cards, loading indicators
+    │   │       ├── screens/                  # Full-screen Composables
+    │   │       │   ├── ActivityFeedScreen.kt
+    │   │       │   ├── DailyChallengeScreen.kt
+    │   │       │   ├── LeaderboardScreen.kt
+    │   │       │   ├── LearningPathScreen.kt
+    │   │       │   ├── LoginScreen.kt
+    │   │       │   ├── MainScreen.kt         # Dashboard / home screen
+    │   │       │   ├── NotificationScreen.kt
+    │   │       │   ├── OnboardingScreen.kt
+    │   │       │   ├── PerformanceScreen.kt
+    │   │       │   ├── PlaceholderScreens.kt # Stub screens not yet implemented
+    │   │       │   ├── ProfileScreen.kt
+    │   │       │   ├── PublicProfileScreen.kt
+    │   │       │   ├── RegisterScreen.kt
+    │   │       │   ├── RoleplayScreen.kt     # AI-powered roleplay practice
+    │   │       │   ├── SearchUsersScreen.kt
+    │   │       │   ├── SettingsScreen.kt
+    │   │       │   ├── WritingPracticeScreen.kt
+    │   │       │   └── game/                 # Mini-game screens
+    │   │       │       ├── FillBlankScreen.kt
+    │   │       │       ├── GameCommonScreens.kt   # Shared game result / lobby screens
+    │   │       │       ├── ImageToWordScreen.kt
+    │   │       │       ├── SentenceOrderScreen.kt
+    │   │       │       ├── SyllableMatchScreen.kt
+    │   │       │       ├── WordChainScreen.kt
+    │   │       │       ├── WordSearchScreen.kt
+    │   │       │       └── WordToImageScreen.kt
+    │   │       ├── theme/
+    │   │       │   ├── Color.kt
+    │   │       │   ├── Theme.kt              # VietforcesTheme (Material 3)
+    │   │       │   └── Type.kt
+    │   │       └── viewmodel/                # @HiltViewModel classes
+    │   │           ├── ActivityFeedViewModel.kt
+    │   │           ├── AuthViewModel.kt
+    │   │           ├── DailyChallengeViewModel.kt
+    │   │           ├── LeaderboardViewModel.kt
+    │   │           ├── PublicProfileViewModel.kt
+    │   │           └── SocialViewModel.kt
+    │   └── res/                              # Android resources (drawables, mipmaps, values)
+    ├── androidTest/                          # Instrumented tests (ExampleInstrumentedTest.kt)
+    └── test/                                 # Unit tests (ExampleUnitTest.kt)
+```
 
-**`data/model/`:**
-- Purpose: Domain data classes and enums — no business logic (except computed properties)
-- Contains: `VocabularyItem`, `SentenceItem`, `UserProgress`, `GameMode`, `EloRank`, all AI result models, `RoleplayScenario`
-- Key files: `VocabularyItem.kt` (core learning unit), `AiModels.kt` (all AI request/response types), `GameMode.kt` (7-mode enum with icons/colors)
+### Package naming convention
+`com.example.vietforces` — root package. Sub-packages follow layer names exactly: `data`, `di`, `navigation`, `ui`.
 
-**`data/remote/`:**
-- Purpose: Network communication layer — single file, single responsibility
-- Contains: `OpenAiClient.kt` — OkHttp client calling `https://api.openai.com/v1/chat/completions`; three public methods: `completeJson`, `completeJsonChat`, `completeChat`
+### Where to add new Android code
 
-**`data/repository/`:**
-- Purpose: Static vocabulary dataset (single source of truth for all word/sentence data)
-- Contains: `VocabularyRepository.kt` — one large `object` with `allVocabulary: List<VocabularyItem>` and sentence lists per category; ~100 words across 9 categories
-- Note: File is 62KB — the largest in the project
+| What to add | Where |
+|-------------|-------|
+| New screen | `ui/screens/NewScreen.kt` + route in `Screen.kt` + `composable {}` block in `MainActivity.kt` |
+| New game mode | `ui/screens/game/NewGameScreen.kt` + `Screen.GameNewMode` in `Screen.kt` |
+| New ViewModel | `ui/viewmodel/NewViewModel.kt` annotated `@HiltViewModel` |
+| New repository | `data/repository/NewRepository.kt` (interface + `@Singleton @Inject constructor` impl) |
+| New Hilt binding (interface) | `di/RepositoryModule.kt` |
+| New local state manager | `data/manager/NewManager.kt` backed by `PreferencesManager` |
+| New model/DTO | `data/model/NewModel.kt` |
+| Shared UI component | `ui/components/NewComponent.kt` |
 
-**`data/storage/`:**
-- Purpose: All SharedPreferences I/O; JSON serialization helpers for complex objects
-- Contains: `PreferencesManager.kt` — must be initialized via `PreferencesManager.init(context)` in `MainActivity.onCreate()` before any manager calls
+## Web Admin (`web-admin/`)
 
-**`navigation/`:**
-- Purpose: Centralized route definitions
-- Contains: `Screen.kt` — sealed class; bottom-nav routes at top level, game routes under `"game/"` prefix
+```
+web-admin/
+├── package.json
+├── next.config.ts
+├── tailwind.config.ts
+├── tsconfig.json
+└── src/
+    ├── app/
+    │   ├── layout.tsx              # Root layout (Geist font, globals.css)
+    │   ├── page.tsx                # / → redirect to /admin/vocabulary
+    │   ├── globals.css             # Tailwind base + custom CSS variables
+    │   ├── login/
+    │   │   ├── page.tsx            # Login page (email/password form)
+    │   │   └── actions.ts          # signInAction / signOutAction (Server Actions)
+    │   ├── unauthorized/
+    │   │   └── page.tsx            # 403 page for non-admin authenticated users
+    │   └── admin/
+    │       ├── layout.tsx          # Admin shell: sidebar nav + auth check
+    │       ├── page.tsx            # Redirect to /admin/vocabulary
+    │       ├── vocabulary/
+    │       │   ├── page.tsx        # Word list table (Server Component)
+    │       │   ├── new/page.tsx    # Create word form
+    │       │   └── [id]/edit/page.tsx  # Edit word form
+    │       ├── users/
+    │       │   └── page.tsx        # User management table
+    │       ├── analytics/
+    │       │   ├── page.tsx        # Stats dashboard (Server Component)
+    │       │   └── charts.tsx      # Recharts client components
+    │       └── daily-challenges/
+    │           └── page.tsx        # Challenge list + manual trigger
+    ├── lib/
+    │   ├── supabase/
+    │   │   ├── server.ts           # createServerClient — SSR cookie auth (anon key)
+    │   │   ├── client.ts           # createBrowserClient — client components (anon key)
+    │   │   └── admin.ts            # createAdminClient — service_role (server-only)
+    │   └── actions/
+    │       ├── vocabulary.ts       # createWord / updateWord / deleteWord Server Actions
+    │       ├── users.ts            # banUser / unbanUser / listUsers Server Actions
+    │       ├── analytics.ts        # getAnalytics Server Action
+    │       └── daily-challenges.ts # listChallenges / triggerGenerate Server Actions
+    └── types/
+        ├── vocabulary.ts           # Word, WordFormData types
+        └── users.ts                # AdminUser type
+```
 
-**`ui/components/`:**
-- Purpose: Reusable Compose components shared across multiple screens
-- Key files: `DraggableMascot.kt` (rooster mascot with drag, AI reactions, `MascotFeedbackManager` singleton), `BottomNavigation.kt`, `GameModeCard.kt`
+### Where to add new web-admin code
 
-**`ui/screens/`:**
-- Purpose: Top-level screen composables (one file per screen)
-- Key files: `MainScreen.kt` (home dashboard), `PerformanceScreen.kt` (Elo chart, heatmap), `RoleplayScreen.kt` (AI chat tutor), `WritingPracticeScreen.kt` (AI graded writing), `LearningPathScreen.kt` (AI personalized plan)
+| What to add | Where |
+|-------------|-------|
+| New admin page | `src/app/admin/<section>/page.tsx` (Server Component) + link in `admin/layout.tsx` sidebar |
+| New data mutation | `src/lib/actions/<section>.ts` (Server Action with `'use server'`) |
+| New Supabase query | Add to appropriate `src/lib/actions/*.ts` using `createClient()` (anon) or `createAdminClient()` (privileged) |
+| New TypeScript type | `src/types/<domain>.ts` |
+| New client chart/widget | Mark file with `'use client'`, place alongside its page (e.g. `analytics/charts.tsx`) |
 
-**`ui/screens/game/`:**
-- Purpose: One composable file per game mode
-- Contains: Each file defines a `GameState` data class + main `Screen` composable + supporting composables
-- Shared: `GameCommonScreens.kt` provides `DifficultySelectionScreen` and `GameOverScreen` reused by all game modes that support difficulty selection
+## Web Landing (`web-landing/`)
 
-**`ui/theme/`:**
-- Purpose: Material3 theme, brand colors, typography
-- Key files: `Color.kt` (Vietnamese flag colors + 7 game-mode colors), `Theme.kt` (`VietforcesTheme` wrapper)
+```
+web-landing/
+├── package.json
+├── next.config.ts
+├── tailwind.config.ts
+├── tsconfig.json
+└── src/
+    └── app/
+        ├── layout.tsx      # Root layout (Geist font, metadata, globals.css)
+        ├── page.tsx        # Full single-page site (Navbar, Hero, Features, Screenshots, Download)
+        └── globals.css     # Tailwind directives + dark background variables
+```
 
-**`res/drawable/`:**
-- Purpose: Vocabulary images referenced by `VocabularyItem.imageResId`
-- Naming: `{category}_{NNN}.{jpg|jpeg|png}` — e.g., `animal_001.jpg`, `food_016.png`
-- Categories: `animal` (20), `food` (20), `household` (13), `place` (15), `school` (12), `kitchen` (12), `clothing` (9), `vehicle` (6), `body` (2)
+Single-page static site. No components directory — all sections are inline JSX in `page.tsx`. No API calls or authentication. Add new landing sections directly to `src/app/page.tsx`.
 
-## Key File Locations
+## Supabase Backend (`supabase/`)
 
-**Entry Points:**
-- `app/src/main/java/com/example/vietforces/MainActivity.kt`: App launch, manager init, NavHost
-- `app/src/main/AndroidManifest.xml`: Single activity declaration, INTERNET permission
+```
+supabase/
+├── config.toml             # Supabase CLI project configuration
+├── README.md               # Local dev setup instructions
+├── migrations/             # Ordered SQL migrations (idempotent)
+│   ├── 001_initial_schema.sql       # Core tables: users, user_progress, leaderboard,
+│   │                                #   daily_challenges, friendships, fcm_tokens
+│   ├── 002_elo_function.sql         # calculate_elo() RPC + get_rank_tier() helper
+│   ├── 003_streak_function.sql      # update_streak() RPC + streak_history table
+│   ├── 004_leaderboard_week.sql     # reset_weekly_elo() + pg_cron Monday job
+│   ├── 005_daily_completions.sql    # daily_completions table
+│   ├── 006_daily_bonus_elo.sql      # award_daily_bonus() SECURITY DEFINER RPC
+│   ├── 007_activity_feed.sql        # activity_events table + on_daily_completion_insert trigger
+│   │                                #   + RLS patches: users public search, progress public read
+│   ├── 008_admin_schema.sql         # is_admin column on users + public.words table
+│   ├── 009_security_fixes.sql       # Security hardening patches
+│   ├── 010_notif_preferences.sql    # notif_streak_enabled / notif_daily_enabled columns
+│   └── 011_handle_new_user_trigger.sql  # handle_new_user() trigger on auth.users INSERT
+└── functions/              # Deno Edge Functions
+    ├── generate-daily-challenge/
+    │   └── index.ts        # pg_cron daily 00:00 UTC: insert daily_challenges row
+    ├── openai-proxy/
+    │   └── index.ts        # On-demand: proxy OpenAI chat completions (hides API key)
+    ├── refresh-streak-freeze/
+    │   └── index.ts        # pg_cron Monday 01:00 UTC: call grant_streak_freeze() RPC
+    └── send-streak-reminder/
+        └── index.ts        # pg_cron daily 19:00 UTC: FCM push to users without today's practice
+```
 
-**Configuration:**
-- `app/build.gradle.kts`: Dependency declarations, `BuildConfig` field injection for `OPENAI_API_KEY`
-- `gradle.properties`: Kotlin/Gradle configuration
-- `app/src/main/res/values/strings.xml`: App name string resource
+### Migration ordering rules
+- Migrations are numbered sequentially (`001`, `002`, …). Always increment the counter.
+- Each migration must be idempotent (`CREATE TABLE IF NOT EXISTS`, `CREATE OR REPLACE FUNCTION`, `ADD COLUMN IF NOT EXISTS`).
+- New tables requiring service_role-only writes must use RLS with `TO service_role WITH CHECK (TRUE)`.
 
-**Core Logic:**
-- `app/src/main/java/com/example/vietforces/data/repository/VocabularyRepository.kt`: All vocabulary data
-- `app/src/main/java/com/example/vietforces/data/manager/UserProgressManager.kt`: Elo + streak logic
-- `app/src/main/java/com/example/vietforces/data/manager/AiManager.kt`: All AI feature orchestration
-- `app/src/main/java/com/example/vietforces/data/remote/OpenAiClient.kt`: OpenAI HTTP client
+### Where to add new Supabase code
 
-**Navigation:**
-- `app/src/main/java/com/example/vietforces/navigation/Screen.kt`: All route strings
-
-**Testing:**
-- No test files detected (`app/src/test/` and `app/src/androidTest/` not present)
-
-## Naming Conventions
-
-**Files:**
-- Screen composables: `PascalCase` + `Screen.kt` suffix — e.g., `MainScreen.kt`, `ImageToWordScreen.kt`
-- Manager singletons: `PascalCase` + `Manager.kt` suffix — e.g., `UserProgressManager.kt`
-- Model files: `PascalCase.kt` named after primary class — e.g., `VocabularyItem.kt`, `AiModels.kt`
-- Drawable resources: `{category}_{NNN}.{ext}` snake_case — e.g., `animal_001.jpg`
-
-**Directories:**
-- Source: `lowercase/` following Android conventions (`manager`, `model`, `remote`, `repository`, `storage`)
-- UI: `screens/` for full screens, `components/` for reusable widgets, `theme/` for styling
-
-**Classes/Objects:**
-- Manager singletons: `object XxxManager`
-- Screen composables: `@Composable fun XxxScreen(...)`
-- Data classes: `data class Xxx(...)`
-- Sealed navigation: `sealed class Screen(val route: String)` with `object` children
-
-**Game State:**
-- Each game screen declares a local `data class XxxGameState(...)` at the top of its file, e.g., `ImageToWordGameState` in `ImageToWordScreen.kt`
-
-## Where to Add New Code
-
-**New Vocabulary Words:**
-- Add `VocabularyItem(...)` entries to `app/src/main/java/com/example/vietforces/data/repository/VocabularyRepository.kt`
-- Add corresponding drawable image to `app/src/main/res/drawable/` following `{category}_{NNN}.jpg` naming
-- New categories need a new `category` string in `VocabularyItem`; no other registration required
-
-**New Game Mode:**
-1. Add enum entry to `com.example.vietforces.data.model.GameMode` in `data/model/GameMode.kt` (with id, title, description, icon, color)
-2. Add enum entry to `com.example.vietforces.data.manager.GameMode` in `data/manager/EncounteredItemsManager.kt` (with key string)
-3. Create `app/src/main/java/com/example/vietforces/ui/screens/game/XxxScreen.kt`
-4. Add `object Xxx : Screen("game/xxx")` to `navigation/Screen.kt`
-5. Wire route in `MainActivity.kt` `NavHost` block and `onGameModeClick` when-expression
-
-**New Top-Level Screen:**
-1. Create `app/src/main/java/com/example/vietforces/ui/screens/XxxScreen.kt`
-2. Add `object Xxx : Screen("xxx")` to `navigation/Screen.kt`
-3. Wire `composable(Screen.Xxx.route) { XxxScreen(...) }` in `MainActivity.kt` NavHost
-
-**New Manager:**
-1. Create `app/src/main/java/com/example/vietforces/data/manager/XxxManager.kt` as `object XxxManager`
-2. Add `loadFromPreferences()` function; call it in `MainActivity.onCreate()` after `PreferencesManager.init()`
-3. Add persistence keys and helpers to `PreferencesManager.kt`
-
-**New AI Feature:**
-1. Add data models to `data/model/AiModels.kt`
-2. Add a `suspend fun xxx(...)` to `AiManager.kt` returning `AiCallResult<YourModel>`
-3. Follow existing pattern: check toggle → build Vietnamese prompt → call `OpenAiClient.completeJson()` → parse JSON → return `AiCallResult.Success`
-
-**New Reusable UI Component:**
-- Create `app/src/main/java/com/example/vietforces/ui/components/XxxComponent.kt`
-
-**New Colors:**
-- Add to `app/src/main/java/com/example/vietforces/ui/theme/Color.kt`
-
-## Special Directories
-
-**`res/drawable/`:**
-- Purpose: Vocabulary reference images (JPG/PNG/JPEG)
-- Generated: No — manually added
-- Committed: Yes — images are bundled in APK
-
-**`res/mipmap-*/`:**
-- Purpose: Adaptive launcher icon assets
-- Generated: Yes (via Android Studio Image Asset wizard)
-- Committed: Yes
-
-**`.planning/codebase/`:**
-- Purpose: Architecture analysis documents (this file)
-- Generated: Yes (by GSD mapper)
-- Committed: Yes
+| What to add | Where |
+|-------------|-------|
+| New table or column | New migration `0NN_description.sql` |
+| New RPC / trigger function | New migration or append to relevant existing migration |
+| New scheduled job | New Edge Function under `functions/<name>/index.ts` + pg_cron SQL comment in file |
+| New RLS policy | Migration file; follow existing `CREATE POLICY "table_action_scope"` naming |
 
 ---
 
-*Structure analysis: 2026-07-22*
+*Structure analysis: 2026-07-24*

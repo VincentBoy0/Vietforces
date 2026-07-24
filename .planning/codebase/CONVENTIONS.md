@@ -1,192 +1,282 @@
 # Coding Conventions
 
-**Analysis Date:** 2026-07-22
+**Analysis Date:** 2026-07-24
 
-## Naming Patterns
+## Android (Kotlin)
 
-**Files:**
-- Kotlin files use `PascalCase` matching the primary class/object/composable they contain
-- Screen files: `[Name]Screen.kt` (e.g., `MainScreen.kt`, `FillBlankScreen.kt`)
-- Component files: descriptive noun, `PascalCase` (e.g., `BottomNavigation.kt`, `DraggableMascot.kt`)
-- Manager singletons: `[Domain]Manager.kt` (e.g., `AiManager.kt`, `UserProgressManager.kt`, `SettingsManager.kt`)
-- Model files: plural or descriptive noun (e.g., `VocabularyItem.kt`, `AiModels.kt`, `GameMode.kt`)
-- Repository: `[Domain]Repository.kt` (e.g., `VocabularyRepository.kt`)
+### Package Structure & Naming
 
-**Classes / Objects / Enums:**
-- `PascalCase` for all: `VocabularyItem`, `GameMode`, `EloRankUtils`, `OpenAiClient`
-- Singleton managers use `object` (not class): `object AiManager`, `object SettingsManager`
-- Sealed classes for navigation: `sealed class Screen(val route: String)`
-- Sealed classes for navigation items: `sealed class BottomNavItem(...)` with nested `object` entries
+- Root package: `com.example.vietforces`
+- Layers are sub-packages: `ui.screens`, `ui.viewmodel`, `ui.components`, `ui.theme`, `data.repository`, `data.model`, `data.manager`, `data.remote`, `data.storage`, `di`, `navigation`
+- File names match the primary class/object they contain, in PascalCase: `AuthViewModel.kt`, `DailyChallengeRepository.kt`
+- Screen files are named `<Feature>Screen.kt` (e.g., `LoginScreen.kt`, `MainScreen.kt`)
+- ViewModel files: `<Feature>ViewModel.kt`
+- Repository implementations: `<Feature>RepositoryImpl.kt`, interface: `<Feature>Repository`
+- DI modules: `<Name>Module.kt` (e.g., `RepositoryModule.kt`, `SupabaseModule.kt`)
 
-**Functions:**
-- `camelCase` for all functions: `loadFromPreferences()`, `gradeWriting()`, `getCurrentRank()`
-- Boolean-returning functions prefixed with `is` or `has`: `isConfigured()`, `isAvailable()`
-- Suspend functions follow the same naming — no `suspend` prefix in names
-- Private helpers follow the same pattern: `sanitize()`, `parseMistakes()`, `extractContent()`
+### Class & Function Naming
 
-**Variables & Properties:**
-- `camelCase` for all local variables and properties
-- Compose state: `var [name] by remember { mutableStateOf(...) }` pattern
-- Private set with `private set` modifier when state is publicly readable but only privately mutable
-- Constants use `const val UPPER_SNAKE_CASE`: `const val BASE_MASCOT_SIZE = 70f`
-- Color constants in theme: `PascalCase` with descriptive prefix (`VietRed`, `GameModeImageToWord`)
+- Classes: PascalCase (`AuthViewModel`, `DailyChallengeUiState`)
+- Functions: camelCase (`signIn`, `loadChallenge`, `submitCompletion`)
+- Constants / companion fields: camelCase private, `UPPER_SNAKE_CASE` for top-level constants
+- Private backing StateFlow: `_uiState` (underscore prefix); public exposure: `uiState`
+- Route strings in `Screen.kt`: snake_case string literals (e.g., `"auth/login"`, `"game/image_to_word"`)
 
-**Types / Data Classes:**
-- `PascalCase`, named after the concept they represent
-- Data class for value holders: `data class VocabularyItem(...)`, `data class FillBlankGameState(...)`
-- Fields within data classes use `camelCase`
+### Architecture Pattern
 
-**Route Strings:**
-- `snake_case` for route strings: `"main"`, `"writing_practice"`, `"game/image_to_word"`
-- Game sub-routes use path prefix: `"game/[mode_id]"`
-- Mode IDs also `snake_case`: `"image_to_word"`, `"fill_blank"`
+MVVM + Repository + Hilt DI:
 
-**KDoc Comments:**
-- All public classes, data models, and singleton managers have a KDoc header comment
-- Parameters documented with `@param` for public data classes and complex functions
-- Computed properties have one-line KDoc describing the transformation
+```
+Screen (Composable)
+  └── ViewModel (HiltViewModel + StateFlow)
+        └── Repository (interface + Impl)
+              └── SupabaseClient / remote source
+```
 
-## Code Style
+- ViewModels hold `MutableStateFlow<UiState>` and expose `StateFlow<UiState>` via `.asStateFlow()`
+- All async work in `viewModelScope.launch { }`
+- Repositories return `Result<T>` — never throw to the ViewModel layer
+- ViewModels use `.onSuccess { } / .onFailure { }` on `Result`
 
-**Formatting:**
-- No explicit formatter config (no `.editorconfig`, no `ktlint`, no `detekt` detected)
-- Standard Kotlin code style followed manually
-- Trailing lambda style used throughout Compose calls
-- Wildcard imports used for Compose namespaces: `import androidx.compose.material3.*`, `import androidx.compose.runtime.*`
-- Per-class imports for business logic code (non-wildcard)
+### UI State Pattern
 
-**Linting:**
-- No dedicated lint/static analysis tool configured beyond Android Studio defaults
-- `@OptIn(ExperimentalMaterial3Api::class)` applied at composable function level where needed
+Sealed classes are used for every feature's UI state:
 
-**Spacing & Layout:**
-- 4-space indentation (Kotlin/Android standard)
-- Closing `}` on its own line
-- Blank line between logical sections within a composable
-- Section separators as comment banners inside large files: `// ==================== §6.2 ... ====================`
+```kotlin
+sealed class AuthUiState {
+    object Idle : AuthUiState()
+    object Loading : AuthUiState()
+    object Success : AuthUiState()
+    data class Error(val message: String) : AuthUiState()
+}
+```
 
-## Import Organization
+- Always includes: `Loading`, at least one success state, `Error(val message: String)`
+- `object` for states with no payload, `data class` for states with data
+- Feature-specific states add extra variants (e.g., `DailyChallengeUiState.NoChallenge`, `DailyChallengeUiState.Completed`)
 
-**Order (observed pattern):**
-1. Android / platform imports (`android.*`, `androidx.*`)
-2. Compose imports (`androidx.compose.*`)
-3. Navigation imports
-4. Project-internal imports (`com.example.vietforces.*`)
-5. Third-party libraries (`okhttp3.*`, `kotlinx.*`, `org.json.*`)
+### DI Conventions (Hilt)
 
-**Path Aliases:**
-- None configured — full package paths used everywhere
+- ViewModels: `@HiltViewModel` + `@Inject constructor(...)`
+- Singletons: `@Singleton` + `@Inject constructor(...)` on the `Impl` class
+- Modules in `app/src/main/java/com/example/vietforces/di/`
+- `@InstallIn(SingletonComponent::class)` for app-scoped bindings
+- Interface bindings use `@Binds`; simple `@Inject constructor` singletons need no module entry
 
-**Wildcard Usage:**
-- Wildcard imports used for Compose UI namespaces in Screen/Component files:
-  ```kotlin
-  import androidx.compose.material3.*
-  import androidx.compose.runtime.*
-  import androidx.compose.foundation.layout.*
-  import com.example.vietforces.ui.screens.*
-  ```
-- Non-wildcard for business logic files (managers, models, clients)
+### Jetpack Compose Conventions
 
-## Error Handling
+- All UI is Composable functions (no XML layouts)
+- Screen composables receive navigation callbacks as lambdas: `onLoginSuccess: () -> Unit`
+- ViewModels injected via `hiltViewModel()` with a default parameter
+- State collected with `collectAsStateWithLifecycle()`
+- Local UI state (text fields, toggles) uses `remember { mutableStateOf(...) }`
+- Side effects in `LaunchedEffect(key)` — e.g., navigate on auth state change
+- Wildcard imports are used for Compose packages (e.g., `import androidx.compose.material3.*`)
 
-**Patterns:**
+### Navigation
 
-**Manager layer — never throw to UI:**
-- All public `suspend` functions in `AiManager` return `AiCallResult<T>` (a sealed result type) instead of throwing
-- `AiCallResult.Success(data)` on success; `AiCallResult.Error(message, isConfigError)` on failure
-- Callers in UI receive a typed result and render accordingly — no try/catch in composables
+- Routes defined as `sealed class Screen(val route: String)` in `app/src/main/java/com/example/vietforces/navigation/Screen.kt`
+- Route strings use `/` for hierarchy grouping: `"game/image_to_word"`, `"social/profile/{userId}"`
+- Dynamic routes: `createRoute(userId: String)` companion method on the `Screen` object
 
-**Singleton managers — safe preference access:**
-- `try { ... } catch (e: Exception) { /* keep defaults */ }` pattern used in all `loadFromPreferences()` calls
-- `runCatching { ... }` used for fire-and-forget save operations where failure is acceptable:
-  ```kotlin
-  runCatching { PreferencesManager.saveAiFeedbackEnabled(enabled) }
-  ```
+### Comments
 
-**Network layer (`OpenAiClient`):**
-- `NotConfiguredException : IOException` thrown when API key is blank (callers catch this specifically)
-- HTTP error codes converted to `IOException` with descriptive message
-- Empty/blank AI content results in `IOException("AI trả về nội dung rỗng")`
-- All network calls run on `Dispatchers.IO` via `withContext`
-
-**Blank-reply retry pattern:**
-- One automatic retry on blank AI reply before substituting a hardcoded fallback message:
-  ```kotlin
-  if (turn.reply.isBlank()) {
-      turn = requestRoleplayTurn(messages)
-  }
-  if (turn.reply.isBlank()) {
-      turn = turn.copy(reply = "Dạ, bạn nói lại giúp mình một chút nhé?")
-  }
-  ```
-
-**Compose state guards:**
-- Boolean flags like `isGrading`, `showResult`, `showGameOver` guard async operation transitions
-- `LaunchedEffect` used to trigger side effects from state changes
-
-## Logging
-
-**Framework:** `android.util.Log`
-
-**Patterns:**
-- Tag matches the class/object name: `Log.w("AiManager", "...")`, `Log.e("AiManager", "...", e)`
-- `Log.w` for recoverable anomalies (e.g., blank AI reply triggering retry)
-- `Log.e` with exception for unexpected failures
-- No structured logging — plain string messages used
-
-## Comments
-
-**When to Comment:**
-- All singleton `object` managers have a multi-line KDoc at the top describing responsibilities
-- All public data classes have KDoc with `@param` for each field
-- Non-obvious computed properties have a one-line KDoc
-- Inline section separators (`// ==== Section ====`) used in large files to separate feature areas
-- Inline `//` comments for explaining intent in business logic (e.g., JSON sanitization, retry logic)
-- `// TODO:` style comments not heavily used — only in placeholder/stub screens
-
-## Function Design
-
-**Size:**
-- Composable screen functions can be long (100–300+ lines) when they contain local state and the full screen layout
-- Business logic functions in managers are typically 10–40 lines
-- Private parsing helpers are small (5–15 lines each)
-
-**Parameters:**
-- Composable screens receive navigation callbacks as lambda parameters: `onBackClick: () -> Unit`, `onGameModeClick: (GameMode) -> Unit`
-- Default values used for optional callbacks: `onWritingPracticeClick: () -> Unit = {}`
-- Data/config parameters go after callback parameters
-- Manager functions use named parameters for AI config (e.g., `temperature: Double = 0.4`)
-
-**Return Values:**
-- Pure data functions return the model directly
-- Fallible async operations return `AiCallResult<T>` (not nullable, not exceptions)
-- Composables return `Unit` (implicit)
-
-## Module / Object Design
-
-**Singletons:**
-- All data managers use Kotlin `object` (app-scoped singletons): `object AiManager`, `object VocabularyRepository`, `object OpenAiClient`
-- State within singletons exposed as Compose-observable state using `mutableStateOf`/`mutableFloatStateOf` with `private set`
-- No dependency injection framework — singletons are directly referenced
-
-**Exports:**
-- No barrel files — classes imported directly by package path
-- `companion object` used for static factory methods: `GameMode.fromId()`, `GameMode.getAllModes()`, `Screen.getGameRoute()`
-
-## Compose Patterns
-
-**State hoisting:**
-- Game state modelled as a single `data class` (e.g., `FillBlankGameState`) held with `by remember { mutableStateOf(...) }`
-- Scope-based coroutine launches for AI/async work: `val scope = rememberCoroutineScope()`
-
-**Theming:**
-- All colors used via named constants from `ui/theme/Color.kt` — no inline hex literals in composables
-- `MaterialTheme` wrapper at app root in `MainActivity.kt`; dynamic color enabled for Android 12+
-
-**Navigation:**
-- `NavHost` + `composable()` routes defined inline in `VietforcesApp()` in `MainActivity.kt`
-- `popUpTo` + `launchSingleTop` + `restoreState` used on all bottom-nav navigations to avoid stack buildup
+- KDoc `/** */` blocks on all public classes and interfaces
+- Inline `//` comments reference ticket IDs (e.g., `// T-04-01`, `// DAILY-02`) that match the planning document
+- Section separators: `// ── Section Name ─────────────────────` for long files
 
 ---
 
-*Convention analysis: 2026-07-22*
+## TypeScript/React (Web)
+
+### Project Structure
+
+- Both `web-admin/` and `web-landing/` use **Next.js 15 App Router** with TypeScript
+- Source lives in `src/`: `src/app/` (pages/layouts), `src/lib/` (actions, supabase clients), `src/types/` (shared types), `src/components/` (if present)
+- Path alias `@/*` maps to `src/*` in both projects
+
+### Component Patterns
+
+- **Server Components** are the default — page files are `async function` that fetch data directly:
+
+```tsx
+export default async function VocabularyPage({ searchParams }) {
+  const [{ words, total }, categories] = await Promise.all([
+    listWords(category, page, 20),
+    listCategories(),
+  ])
+  return <div>...</div>
+}
+```
+
+- No `useState` / `useEffect` patterns observed in admin pages — all data fetching is server-side
+- Client components not observed in `web-admin` (no `'use client'` directive found in explored files)
+- `web-landing/src/app/page.tsx` is a single large static page component — no hooks, no data fetching
+
+### Server Actions
+
+- Placed in `src/lib/actions/<domain>.ts` — always start with `'use server'`
+- Throw `Error(message)` on failure (e.g., `throw new Error(error.message)`)
+- Call `revalidatePath('/admin/...')` after mutations
+- Accept `FormData` for form-based mutations, typed arguments for read operations
+- Use `createAdminClient()` (service role) for all admin mutations and reads
+
+### Type Definitions
+
+- Shared types live in `src/types/<domain>.ts` (e.g., `src/types/vocabulary.ts`, `src/types/users.ts`)
+- Plain TypeScript `interface` for data shapes, `type` for aliases/unions
+- Field names mirror database column names (snake_case): `image_url`, `created_at`, `elo_score`
+
+### Naming
+
+- Files: `kebab-case` for directories, `camelCase.ts` / `PascalCase.tsx` for components
+- React components: PascalCase functions
+- Server action functions: camelCase verbs (`listWords`, `createWord`, `updateWord`, `deleteWord`)
+- Supabase client factories: `createClient()`, `createAdminClient()`
+
+### Styling
+
+- **TailwindCSS v4** (both `web-admin` and `web-landing`)
+- Inline Tailwind utility classes; no separate CSS files observed
+- Design tokens referenced as Tailwind classes (`text-muted-foreground`, `bg-primary`, `border-border`)
+- `web-landing` uses inline `style={{}}` for complex gradients/dimensions alongside Tailwind
+
+### TypeScript Configuration
+
+- `strict: true` enabled in both projects (`web-admin/tsconfig.json`)
+- `moduleResolution: "bundler"`, `jsx: "preserve"`, `incremental: true`
+- Non-null assertion `!` used where env vars are guaranteed: `process.env.NEXT_PUBLIC_SUPABASE_URL!`
+
+---
+
+## Supabase / SQL
+
+### Migration File Naming
+
+- Numbered sequentially: `NNN_description.sql` (e.g., `001_initial_schema.sql`, `009_security_fixes.sql`)
+- Stored in `supabase/migrations/`
+- No timestamp prefix — purely sequential integers
+
+### Migration Header Convention
+
+Every migration file begins with a comment block:
+
+```sql
+-- ============================================================
+-- Migration  : NNN_name
+-- Date       : YYYY-MM-DD
+-- Description: Short description of what this migration does
+-- Idempotent : yes — CREATE TABLE IF NOT EXISTS throughout
+-- ============================================================
+```
+
+- All migrations are idempotent: `CREATE TABLE IF NOT EXISTS`, `CREATE OR REPLACE FUNCTION/VIEW`
+
+### RLS Policy Naming
+
+Pattern: `tablename_action_scope`
+- Examples: `users_select_own`, `users_update_own`, `progress_insert_own`
+- `_own` suffix = `USING (id = auth.uid())` or `USING (user_id = auth.uid())`
+- All tables have RLS enabled immediately after creation: `ALTER TABLE public.X ENABLE ROW LEVEL SECURITY`
+
+### SQL Style
+
+- Table names: `snake_case`, `public.` schema prefix
+- Column names: `snake_case`
+- Section separators: `-- ---------------------------------------------------------------------------` with `-- TABLE: name` label
+- Constraint naming: `tablename_columnname_fk` pattern
+
+### Edge Function Conventions
+
+- All functions use `Deno.serve(async (req: Request) => { ... })`
+- Import `@supabase/supabase-js` from `https://esm.sh/@supabase/supabase-js@2` (no npm installs)
+- Every function defines `corsHeaders` as a top-level constant and handles `OPTIONS` preflight
+- Environment secrets via `Deno.env.get("SECRET_NAME")`
+- Auth checked at function entry; return `401` immediately on failure
+- Error responses: `JSON.stringify({ error: message })` with appropriate HTTP status
+- `console.log` for operational logging, `console.error` for errors
+
+---
+
+## Code Style Enforcement
+
+### web-admin
+
+- **ESLint**: `eslint-config-next` (configured via `package.json`'s `"lint": "next lint"`); no custom `.eslintrc` file — relies on Next.js built-in ESLint defaults
+- **TypeScript**: `tsc --noEmit` via `"type-check"` script
+- No Prettier configuration detected — formatting is unenforced
+
+### web-landing
+
+- No ESLint configured (no eslint dependency in `package.json`, no eslintrc)
+- TypeScript strict mode enabled
+- No Prettier configuration detected
+
+### Android (Kotlin)
+
+- No ktlint or detekt configuration found in the repository
+- No `.editorconfig` detected
+- Code style is consistent (likely IDE-enforced via Android Studio defaults), but no automated enforcement in CI
+
+---
+
+## Error Handling Patterns
+
+### Android (Kotlin)
+
+- Repositories always return `Result<T>` — never throw:
+  ```kotlin
+  return try {
+      // supabase call
+      Result.success(Unit)
+  } catch (e: Exception) {
+      Result.failure(e)
+  }
+  ```
+- ViewModels unwrap with `.onSuccess { } / .onFailure { }` and update `_uiState` to an `Error` state
+- User-facing error messages are mapped to friendly Vietnamese strings in the ViewModel (see `AuthViewModel.toFriendlyMessage()`)
+- `AiManager` — returns `AiCallResult` with fallback message; never throws to UI
+- `android.util.Log` used for debugging in manager/remote layer
+
+### TypeScript Web (Next.js)
+
+- Server actions throw `Error(message)` on failure
+- Read actions (list/get) return empty arrays/null on error with `console.error` logging:
+  ```ts
+  if (error) {
+    console.error('listWords error:', error)
+    return { words: [], total: 0 }
+  }
+  ```
+- Mutations throw to propagate errors to the calling page/form
+- No global error boundary component observed
+
+### Supabase Edge Functions
+
+- `try/catch` wraps entire handler body
+- Caught errors return `{ error: (error as Error).message }` with HTTP 500
+- Specific guard failures (missing secret, bad auth) return early with 401/500 before the main try block
+
+---
+
+## State Management
+
+### Android (Kotlin)
+
+- **ViewModel-scoped `StateFlow`** is the primary state management mechanism
+- `MutableStateFlow` private with `_` prefix; public `StateFlow` via `.asStateFlow()`
+- `UserProgressManager` and `AiManager` are `object` singletons with `mutableStateOf` Compose state — used for app-wide data that doesn't need a ViewModel lifecycle
+- `PreferencesManager` is a singleton for local persistence (SharedPreferences wrapper)
+- No Redux/MVI — MVVM only
+- `SharingStarted.WhileSubscribed(5000)` used when converting repository flows to StateFlow in ViewModels
+
+### TypeScript Web (Next.js)
+
+- **No client-side state management** — all pages are Server Components fetching data at render time
+- URL search params used for filter/pagination state (e.g., `?category=...&page=...`)
+- No `useState`, no Zustand, no Redux observed in the explored admin pages
+- Form state handled by native HTML forms with `method="GET"` / Server Actions
+
+---
+
+*Convention analysis: 2026-07-24*

@@ -1,229 +1,258 @@
-<!-- refreshed: 2026-07-22 -->
+<!-- refreshed: 2026-07-24 -->
 # Architecture
 
-**Analysis Date:** 2026-07-22
+**Analysis Date:** 2026-07-24
 
 ## System Overview
 
-```text
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                          UI Layer (Jetpack Compose)                          │
-├──────────────────┬──────────────────┬──────────────────┬────────────────────┤
-│  Bottom Nav      │  Core Screens    │  Game Screens    │  UI Components     │
-│  Screens         │  (Main, Profile, │  (7 modes under  │  (DraggableMascot, │
-│  `ui/screens/`   │   Settings,      │  `ui/screens/    │   BottomNavigation,│
-│                  │   Performance,   │    game/`)       │   GameModeCard,    │
-│                  │   Notification,  │                  │   RoosterMascot)   │
-│                  │   Roleplay,      │                  │  `ui/components/`  │
-│                  │   Writing,       │                  │                    │
-│                  │   LearningPath)  │                  │                    │
-└──────────┬───────┴────────┬─────────┴──────────────────┴────────────────────┘
-           │                │
-           ▼                ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                       Manager Layer (Singleton objects)                      │
-│  UserProgressManager · AiManager · SettingsManager · ProfileManager         │
-│  NotificationManager · EncounteredItemsManager                               │
-│  `data/manager/`                                                             │
-└──────────┬──────────────────────────────────────────────────────────────────┘
+VietForces is a Vietnamese vocabulary-learning platform composed of four distinct components that share a single Supabase backend:
+
+```
+┌────────────────────────────────────────────────────────────────────┐
+│                     Client Layer                                    │
+├───────────────────────┬───────────────────┬────────────────────────┤
+│   Android App         │   Web Admin        │   Web Landing          │
+│   (Kotlin/Compose)    │   (Next.js 15)     │   (Next.js 15)         │
+│   `app/`              │   `web-admin/`     │   `web-landing/`       │
+└──────────┬────────────┴────────┬──────────┴────────────────────────┘
+           │                     │
+           ▼                     ▼
+┌────────────────────────────────────────────────────────────────────┐
+│                   Supabase Backend                                  │
+│   Auth · Postgres (RLS) · Realtime · Storage · Edge Functions       │
+│   `supabase/`                                                       │
+└────────────────────────────────────────────────────────────────────┘
            │
-     ┌─────┴──────────────────────────────────────┐
-     ▼                                            ▼
-┌─────────────────────────┐        ┌──────────────────────────────────────────┐
-│  Repository / Models    │        │  Remote / Storage                        │
-│  VocabularyRepository   │        │  OpenAiClient (OkHttp → OpenAI API)      │
-│  `data/repository/`     │        │  PreferencesManager (SharedPreferences)  │
-│  `data/model/`          │        │  `data/remote/` · `data/storage/`        │
-└─────────────────────────┘        └──────────────────────────────────────────┘
+           ▼
+┌────────────────────────────────────────────────────────────────────┐
+│   External Services                                                 │
+│   OpenAI API (chat completions)  ·  Firebase Cloud Messaging (FCM) │
+└────────────────────────────────────────────────────────────────────┘
 ```
 
-## Component Responsibilities
+## Android App Architecture
 
-| Component | Responsibility | File |
-|-----------|----------------|------|
-| `MainActivity` | App entry point; initializes all Managers; hosts NavController + Scaffold | `MainActivity.kt` |
-| `VietforcesApp` | Root composable; NavHost wiring; bottom-nav visibility logic | `MainActivity.kt` |
-| `Screen` | Sealed class enumerating all navigation routes | `navigation/Screen.kt` |
-| `VocabularyRepository` | Static in-memory dataset of all vocabulary items and sentences | `data/repository/VocabularyRepository.kt` |
-| `UserProgressManager` | Elo rating, streak, heatmap, game-mode stats; persists via PreferencesManager | `data/manager/UserProgressManager.kt` |
-| `AiManager` | Builds prompts, calls OpenAiClient, parses typed AI responses; feature toggles | `data/manager/AiManager.kt` |
-| `EncounteredItemsManager` | Spaced-repetition weighting for each game mode | `data/manager/EncounteredItemsManager.kt` |
-| `SettingsManager` | Mascot size/text multipliers; persists via PreferencesManager | `data/manager/SettingsManager.kt` |
-| `ProfileManager` | User name/phone/address; persists via PreferencesManager | `data/manager/ProfileManager.kt` |
-| `NotificationManager` | In-app achievement/milestone notifications; persists via PreferencesManager | `data/manager/NotificationManager.kt` |
-| `PreferencesManager` | Single SharedPreferences facade; JSON helpers for complex objects | `data/storage/PreferencesManager.kt` |
-| `OpenAiClient` | OkHttp client for OpenAI Chat Completions API (gpt-4o-mini) | `data/remote/OpenAiClient.kt` |
-| `MascotFeedbackManager` | Singleton that drives the floating mascot's messages across all screens | `ui/components/DraggableMascot.kt` |
+**Pattern:** MVVM + Repository + Hilt dependency injection, with Jetpack Compose as the sole UI toolkit.
 
-## Pattern Overview
+### Layers
 
-**Overall:** Single-Activity, Compose-Navigation + Manual Singleton Managers (no ViewModel/MVVM)
+**UI Layer — `app/src/main/java/com/example/vietforces/ui/`**
+- `screens/` — Full-screen Composable functions (one file per screen). Each screen accepts a ViewModel via `hiltViewModel()`.
+- `screens/game/` — Seven mini-game screens (FillBlank, ImageToWord, WordToImage, SentenceOrder, SyllableMatch, WordSearch, WordChain).
+- `components/` — Reusable Composables (BottomNavigation, DraggableMascot, GameModeCard, RoosterMascot, StreakHeatmap, UiComponents).
+- `viewmodel/` — `@HiltViewModel` classes exposing `StateFlow`s consumed by screens. Current ViewModels: `AuthViewModel`, `DailyChallengeViewModel`, `LeaderboardViewModel`, `SocialViewModel`, `PublicProfileViewModel`, `ActivityFeedViewModel`.
+- `theme/` — Material 3 theming (`Color.kt`, `Theme.kt`, `Type.kt`).
 
-**Key Characteristics:**
-- Single `MainActivity` hosts all UI; no Fragments
-- All Managers are Kotlin `object` singletons — no DI framework
-- UI screens read state directly from manager singletons (`UserProgressManager.getEloRating()`)
-- Compose `mutableStateOf` inside singletons propagates state reactively to UI
-- Navigation is flat: `NavHost` in `VietforcesApp`; all routes defined in `Screen` sealed class
-- AI calls are always wrapped in `AiCallResult<T>` (sealed class) so the UI never crashes on AI failure
+**Data Layer — `app/src/main/java/com/example/vietforces/data/`**
+- `repository/` — Interfaces + Supabase-backed implementations for all domain areas: `AuthRepository`, `VocabularyRepository`, `ProgressRepository`, `StreakRepository`, `EloRepository`, `DailyChallengeRepository`, `LeaderboardRepository`, `SocialRepository`.
+- `remote/` — Low-level network clients: `OpenAiClient` (wraps the Supabase `openai-proxy` Edge Function), `RemoteProgressSource` (Supabase Postgrest calls for progress sync).
+- `model/` — Pure Kotlin data classes / sealed classes: `VocabularyItem`, `UserSession`, `UserProgressDto`, `GameMode`, `EloRank`, `RoleplayScenario`, `AiModels`.
+- `manager/` — Singleton managers backed by `PreferencesManager` (SharedPreferences) for local state: `UserProgressManager`, `ProfileManager`, `SettingsManager`, `NotificationManager`, `FCMTokenManager`, `AiManager`, `EncounteredItemsManager`.
+- `storage/` — `PreferencesManager`: SharedPreferences wrapper, initialized once in `VietForcesApplication.onCreate()`.
+- `service/` — `MigrationService`: one-time data migration helper run at app start.
+- `worker/` — `StreakDangerWorker`: `CoroutineWorker` scheduled hourly via WorkManager to fire local streak-danger notifications.
 
-## Layers
+**DI Layer — `app/src/main/java/com/example/vietforces/di/`**
+- `SupabaseModule` — provides a singleton `SupabaseClient` (Auth, Postgrest, Realtime, Storage plugins installed). Credentials read from `BuildConfig.SUPABASE_URL` / `BuildConfig.SUPABASE_ANON_KEY`.
+- `AuthModule` — binds `AuthRepositoryImpl` to `AuthRepository` interface.
+- `GameModule` — provides game-related dependencies.
+- `RepositoryModule` — empty module; repositories use `@Inject constructor` for Hilt auto-binding.
 
-**UI Layer:**
-- Purpose: Render screens and respond to user input
-- Location: `app/src/main/java/com/example/vietforces/ui/`
-- Contains: Composable screen functions, shared UI components, theme (Color, Type, Theme)
-- Depends on: Manager layer, VocabularyRepository, data models
-- Used by: Nothing (top of the stack)
+**Navigation — `app/src/main/java/com/example/vietforces/navigation/`**
+- `Screen.kt` — Sealed class defining all 26 named routes (auth, onboarding, bottom-nav, game modes, social).
+- Navigation host lives in `MainActivity.kt`; route decisions are driven by `AuthViewModel.authState` (`StateFlow<AuthState>`).
 
-**Manager Layer:**
-- Purpose: Business logic, state management, persistence orchestration
-- Location: `app/src/main/java/com/example/vietforces/data/manager/`
-- Contains: `UserProgressManager`, `AiManager`, `SettingsManager`, `ProfileManager`, `NotificationManager`, `EncounteredItemsManager`
-- Depends on: `PreferencesManager`, `OpenAiClient`, `VocabularyRepository`, data models
-- Used by: UI screens and components
+**Entry Point**
+- `VietForcesApplication.kt` — `@HiltAndroidApp`, initializes `PreferencesManager` and enqueues `StreakDangerWorker` periodic job.
+- `MainActivity.kt` — `@AndroidEntryPoint`, sets up Compose content, handles deep-links (Supabase OAuth), requests FCM notification permission.
+- `VietForcesFirebaseMessagingService.kt` — FCM token refresh + incoming push handler.
 
-**Repository / Data Layer:**
-- Purpose: Static vocabulary data source; domain models
-- Location: `app/src/main/java/com/example/vietforces/data/repository/` and `data/model/`
-- Contains: `VocabularyRepository` (in-memory list of ~100 `VocabularyItem`s + `SentenceItem`s), all domain model data classes
-- Depends on: Nothing except `R.drawable.*` for image resource IDs
-- Used by: Game screens directly, Manager layer
+### Data Flow (Android)
 
-**Remote Layer:**
-- Purpose: HTTP communication with OpenAI API
-- Location: `app/src/main/java/com/example/vietforces/data/remote/`
-- Contains: `OpenAiClient` (OkHttp, JSON serialization, response extraction)
-- Depends on: OkHttp, `BuildConfig.OPENAI_API_KEY`, `BuildConfig.OPENAI_MODEL`
-- Used by: `AiManager` only
+```
+User Action (UI composable)
+  → ViewModel (viewModelScope.launch)
+    → Repository (suspend fun)
+      → Supabase SDK (Postgrest / Auth / Realtime)
+        ← Supabase Cloud (RPC / table read)
+      ← Result<T> or Flow<T>
+    ← StateFlow update (_uiState.value = …)
+  ← Compose recomposition (collectAsStateWithLifecycle)
+```
 
-**Storage Layer:**
-- Purpose: Persist app state across sessions
-- Location: `app/src/main/java/com/example/vietforces/data/storage/`
-- Contains: `PreferencesManager` (SharedPreferences wrapper with JSON helpers for complex objects)
-- Depends on: Android `Context` (initialized once at app start in `MainActivity.onCreate`)
-- Used by: All Manager singletons
+Local progress is also persisted to `PreferencesManager` via manager singletons for offline/fast access.
+
+## Web Architecture
+
+### Web Admin — `web-admin/`
+
+**Pattern:** Next.js 15 App Router with React Server Components. Mutations go through Server Actions; all Supabase calls are server-side.
+
+**Directory layout:**
+```
+web-admin/src/
+├── app/
+│   ├── layout.tsx              # Root layout (font, globals)
+│   ├── page.tsx                # Redirect → /admin/vocabulary
+│   ├── login/
+│   │   ├── page.tsx            # Login form (client component)
+│   │   └── actions.ts          # signIn / signOut Server Actions
+│   ├── unauthorized/page.tsx   # Shown when is_admin = false
+│   └── admin/
+│       ├── layout.tsx          # Admin shell: sidebar nav + auth guard
+│       ├── page.tsx            # Redirect → /admin/vocabulary
+│       ├── vocabulary/
+│       │   ├── page.tsx        # List all words (Server Component)
+│       │   ├── new/page.tsx    # Create word form
+│       │   └── [id]/edit/page.tsx  # Edit word form
+│       ├── users/page.tsx      # User list + ban/unban actions
+│       ├── analytics/
+│       │   ├── page.tsx        # Stats dashboard (Server Component)
+│       │   └── charts.tsx      # Client-side chart components
+│       └── daily-challenges/page.tsx  # View / trigger daily challenges
+├── lib/
+│   ├── supabase/
+│   │   ├── server.ts           # createServerClient (cookie-based SSR auth)
+│   │   ├── client.ts           # createBrowserClient (client components)
+│   │   └── admin.ts            # createAdminClient (service_role, server-only)
+│   └── actions/
+│       ├── vocabulary.ts       # CRUD Server Actions for public.words
+│       ├── users.ts            # User management Server Actions
+│       ├── analytics.ts        # Analytics query Server Actions
+│       └── daily-challenges.ts # Daily challenge Server Actions
+└── types/
+    ├── vocabulary.ts           # Word / form TypeScript types
+    └── users.ts                # User row types
+```
+
+**Auth guard:** `app/admin/layout.tsx` is a Server Component that calls `supabase.auth.getUser()` and checks `is_admin` on the `public.users` row. Unauthenticated users are redirected to `/login`; authenticated non-admins to `/unauthorized`.
+
+**Supabase clients:**
+- `server.ts` — cookie-based session for RSC / Route Handlers (anon key, user-scoped).
+- `admin.ts` — service_role key for privileged mutations (never imported from `'use client'` files).
+
+### Web Landing — `web-landing/`
+
+A single-page Next.js 15 app with no backend calls. The entire site is one Server Component (`src/app/page.tsx`) rendered as a static page with Tailwind CSS utility classes. Sections: Navbar, Hero, Features, Screenshots, Download CTA.
+
+## Backend Architecture
+
+### Database Schema (`supabase/migrations/`)
+
+| Table | Purpose | RLS |
+|-------|---------|-----|
+| `public.users` | Profile extension of `auth.users` | Own read/update; public username search |
+| `public.user_progress` | ELO, streak, words_learned per user | Own write; public read for leaderboard |
+| `public.leaderboard` | Denormalized leaderboard (Realtime-enabled) | Public read; service_role write only |
+| `public.daily_challenges` | One row per calendar day | Public read; service_role insert |
+| `public.daily_completions` | Per-user completion record per day | Own read; SECURITY DEFINER insert |
+| `public.friendships` | Asymmetric follow graph (follower→following) | Own read/insert/delete |
+| `public.fcm_tokens` | FCM push token per user | Own CRUD |
+| `public.streak_history` | Per-(user, date) practice record | Own read; SECURITY DEFINER insert |
+| `public.activity_events` | Social feed events (daily_completion, elo_milestone) | Own + following read; trigger insert |
+| `public.words` | Admin-managed vocabulary entries | Public read; is_admin write |
+| `public.notification_preferences` | Per-user notification opt-outs | Own CRUD |
+
+**RLS strategy:** All tables have RLS enabled. Sensitive writes (streak updates, ELO calculation, daily bonus award, activity events) are routed through `SECURITY DEFINER` functions with `SET search_path = public` to prevent privilege escalation. Clients never send computed deltas — only raw inputs.
+
+**Key Postgres functions (RPCs):**
+- `calculate_elo(p_user_id, p_correct, p_total, p_time_ms)` — computes new ELO from game metrics (`002_elo_function.sql`)
+- `update_streak(p_user_id, p_today_date)` — validates gap, applies freeze, writes `streak_history` (`003_streak_function.sql`)
+- `award_daily_bonus(p_user_id, p_challenge_date)` — idempotent daily ELO grant (`006_daily_bonus_elo.sql`)
+- `reset_weekly_elo()` — resets `leaderboard.weekly_elo`, called by pg_cron every Monday 00:00 UTC (`004_leaderboard_week.sql`)
+- `grant_streak_freeze()` — grants 1 freeze to users with none, called by Edge Function (`003_streak_function.sql`)
+- `handle_new_user()` — trigger on `auth.users INSERT`, auto-creates `public.users` row (`011_handle_new_user_trigger.sql`)
+
+**Realtime:** `public.leaderboard` is added to `supabase_realtime` publication so the Android app receives live rank updates.
+
+### Edge Functions (`supabase/functions/`)
+
+All Edge Functions run on Deno and use `@supabase/supabase-js@2` from `esm.sh`.
+
+| Function | Schedule | Purpose |
+|----------|----------|---------|
+| `generate-daily-challenge` | pg_cron 00:00 UTC daily | Selects 10 random vocabulary IDs + random game_mode, inserts into `daily_challenges`. Idempotent (SELECT before INSERT). Auth: `CRON_SECRET` header. |
+| `send-streak-reminder` | pg_cron 19:00 UTC daily | Queries users with FCM tokens who haven't practiced today, sends FCM HTTP v1 push notifications. Auth: `CRON_SECRET` + Firebase service account JWT. |
+| `refresh-streak-freeze` | pg_cron Monday 01:00 UTC | Calls `grant_streak_freeze()` RPC to top up streak freezes weekly. Uses service_role key. |
+| `openai-proxy` | On-demand (Android client) | Proxies chat completion requests to OpenAI, attaching `OPENAI_API_KEY` from secrets. Prevents key exposure to Android client. |
 
 ## Data Flow
 
-### Game Answer Flow (e.g., ImageToWord correct answer)
+### Game Session (Android → Supabase)
 
-1. User taps correct answer chip → `ImageToWordScreen` composable (`ui/screens/game/ImageToWordScreen.kt`)
-2. Screen calls `UserProgressManager.recordCorrectAnswer(wordDifficulty, timeTaken)` (`data/manager/UserProgressManager.kt`)
-3. `UserProgressManager` recalculates Elo, updates streak/heatmap, saves via `PreferencesManager.saveUserSession()` (`data/storage/PreferencesManager.kt`)
-4. Screen calls `EncounteredItemsManager.recordResult(gameMode, itemId, correct=true)` (`data/manager/EncounteredItemsManager.kt`)
-5. Screen calls `MascotFeedbackManager.showCorrect(word)` → triggers instant hardcoded reaction + optional AI call to `AiManager.mascotReact()` (`ui/components/DraggableMascot.kt`)
-6. `AiManager` calls `OpenAiClient.completeJson()` → HTTP POST to `https://api.openai.com/v1/chat/completions` (`data/remote/OpenAiClient.kt`)
-7. Response parsed into `MascotFeedback`; `MascotFeedbackManager.feedbackMessage` (Compose state) updates; `DraggableMascot` recomposes with new message
+```
+1. User completes game screen (e.g. FillBlankScreen)
+2. Screen calls ViewModel.onGameComplete(correct, total, timeMs)
+3. ViewModel calls EloRepository.calculateElo(userId, correct, total, timeMs)
+   → Supabase RPC: calculate_elo() [SECURITY DEFINER]
+   ← new elo_score, rank_tier returned
+4. ViewModel calls StreakRepository.updateStreak(userId, todayDate)
+   → Supabase RPC: update_streak() [SECURITY DEFINER]
+   ← streak_count, was_freeze_used returned
+5. Results written to UserProgressManager (in-memory) + PreferencesManager (disk)
+6. If daily challenge: ProgressRepository.awardDailyBonus()
+   → Supabase RPC: award_daily_bonus() [SECURITY DEFINER]
+   → Trigger fires: on_daily_completion_insert() → activity_events row
+7. leaderboard table updated by calculate_elo() (service_role internally)
+8. Android Realtime subscription fires → LeaderboardViewModel refreshes
+```
 
-### AI Writing Grading Flow
+### Admin Vocabulary CRUD (Web Admin → Supabase)
 
-1. User submits paragraph in `WritingPracticeScreen` → calls `AiManager.gradeWriting(topic, text)` (`ui/screens/WritingPracticeScreen.kt`)
-2. `AiManager` checks `aiFeedbackEnabled` toggle; builds Vietnamese system/user prompt
-3. `OpenAiClient.completeJson()` called with `response_format=json_object` (`data/remote/OpenAiClient.kt`)
-4. JSON response parsed into `WritingFeedback` model; returned as `AiCallResult.Success<WritingFeedback>`
-5. Screen receives result and renders score, `mistakes` list, `correctedVersion`
+```
+1. Admin fills form at /admin/vocabulary/new
+2. Form submit → Server Action in lib/actions/vocabulary.ts
+3. Action calls createAdminClient() (service_role key, server-only)
+4. Supabase INSERT to public.words (bypasses RLS, service_role)
+5. revalidatePath('/admin/vocabulary') → Server Component re-renders list
+```
 
-### Navigation Flow
+### Daily Challenge Generation (Scheduled)
 
-1. User interacts with `MainScreen` → callback invoked (e.g., `onGameModeClick(GameMode.IMAGE_TO_WORD)`)
-2. `VietforcesApp` (in `MainActivity.kt`) maps `GameMode` → `Screen` route → `navController.navigate(route)`
-3. `NavHost` matches route → renders target composable
-4. Back navigation: `onBackClick` → `navController.popBackStack()`
+```
+1. pg_cron fires at 00:00 UTC
+2. HTTP POST to generate-daily-challenge Edge Function with CRON_SECRET
+3. Function selects 10 random IDs from 154-word pool (Fisher-Yates)
+4. INSERT into daily_challenges (idempotent — skips if today already exists)
+5. Android app fetches via DailyChallengeRepository.getTodayChallenge()
+```
 
-**State Management:**
-- Kotlin `object` singletons with `mutableStateOf` properties drive reactive UI without ViewModel
-- Compose observes singleton state directly (e.g., `NotificationManager.unreadCount`, `SettingsManager.mascotSizeMultiplier`)
-- No StateFlow / LiveData / ViewModel used
+## Key Design Decisions
 
-## Key Abstractions
+1. **SECURITY DEFINER RPCs for all sensitive writes** — ELO, streak, and daily bonus are computed server-side. Clients send only raw metrics; the database enforces all business logic. Prevents client-side score manipulation.
 
-**`VocabularyItem`:**
-- Purpose: Core learning unit — Vietnamese word with image, classifier, distractors, category, difficulty
-- Examples: `data/model/VocabularyItem.kt`
-- Pattern: Immutable `data class`; `fullWord` and `syllables` computed properties used by multiple game modes
+2. **Vocabulary is static on Android, managed dynamically in DB** — `VocabularyRepository` (`data/repository/VocabularyRepository.kt`) contains a hardcoded list of 154 `VocabularyItem` objects with local drawable references. The admin panel manages `public.words` (the cloud copy) separately. The Edge Function bridges both via a shared ID pool.
 
-**`GameMode` (enum):**
-- Purpose: Registry of all 7 game modes with metadata (id, title, description, icon, color, hasHardMode)
-- Examples: `data/model/GameMode.kt`
-- Pattern: Enum with companion `fromId()` and `getAllModes()` factory; `id` strings match `Screen` route segments
+3. **Hilt `SingletonComponent` for all repositories** — All repositories and the `SupabaseClient` are application-scoped singletons. No per-screen or per-ViewModel scoping.
 
-**`AiCallResult<T>` (sealed class):**
-- Purpose: Universal AI result wrapper — `Success(data)` or `Error(message, isConfigError)`
-- Examples: `data/model/AiModels.kt`
-- Pattern: All `AiManager` suspend functions return `AiCallResult<T>`; UI pattern-matches without try/catch
+4. **Server Actions over API routes in web-admin** — All mutations use Next.js Server Actions (`'use server'`) rather than custom API routes, keeping Supabase client-side code minimal and auth handled entirely server-side.
 
-**`Screen` (sealed class):**
-- Purpose: Type-safe navigation route registry
-- Examples: `navigation/Screen.kt`
-- Pattern: Each screen is an `object` with a `route` string; game routes prefixed with `"game/"`
+5. **Asymmetric follow model** — `public.friendships` is a directed follow graph (not mutual friends), matching Codeforces-style social mechanics. RLS on `activity_events` uses this to scope the social feed.
 
-**`EncounteredItem`:**
-- Purpose: Spaced repetition weight data per vocabulary item per game mode
-- Examples: `data/manager/EncounteredItemsManager.kt`
-- Pattern: SM-2-inspired `calculateWeight()` combining time-since-last, encounter count, and error rate
+6. **ELO tiers mirror Codeforces ranks** — `get_rank_tier()` SQL function and `EloRank.kt` both implement the same 10-tier ladder (Newbie → Legendary Grandmaster) for thematic consistency.
 
-**`EloRank` / `EloRankUtils`:**
-- Purpose: Codeforces-style Elo ranking (Newbie → Legendary Grandmaster) with Vietnamese display names
-- Examples: `data/model/EloRank.kt`
-- Pattern: Static utility object with rank lookup; used by `UserProgressManager` and `PerformanceScreen`
-
-## Entry Points
-
-**`MainActivity.onCreate()`:**
-- Location: `MainActivity.kt`
-- Triggers: App launch (single launcher activity per `AndroidManifest.xml`)
-- Responsibilities: Initialize `PreferencesManager`, load all Manager singletons from SharedPreferences, call `enableEdgeToEdge()`, set Compose content with `VietforcesTheme { VietforcesApp() }`
-
-**`VietforcesApp()` composable:**
-- Location: `MainActivity.kt`
-- Triggers: Called from `MainActivity.setContent`
-- Responsibilities: Create `NavController`, build `Scaffold` with conditional `BottomNavigation`, wire all `NavHost` composable routes, render `DraggableMascot` as top-layer overlay
-
-## Architectural Constraints
-
-- **Threading:** All AI HTTP calls execute on `Dispatchers.IO` inside `OpenAiClient.send()`; coroutines launched from UI via `rememberCoroutineScope()` in each game screen
-- **Global state:** Six `object` singletons hold all app state (`UserProgressManager`, `AiManager`, `SettingsManager`, `ProfileManager`, `NotificationManager`, `EncounteredItemsManager`); each backed by `mutableStateOf` for Compose reactivity
-- **No ViewModel:** State is not lifecycle-aware via ViewModel; all state lives in process-level singletons initialized in `MainActivity.onCreate()`
-- **No DI framework:** All dependencies obtained directly via singleton references; no Hilt/Koin
-- **API key at build time:** `BuildConfig.OPENAI_API_KEY` injected from `local.properties`; must not be published in production APK
-- **Static vocabulary data:** `VocabularyRepository` is an in-memory list — no Room database, no network vocabulary fetch
+7. **PreferencesManager as singleton bootstrapped at Application.onCreate()** — All manager singletons (`UserProgressManager`, `ProfileManager`, etc.) depend on `PreferencesManager` being initialized before any Activity or Worker accesses them. The initialization order is enforced in `VietForcesApplication.onCreate()`.
 
 ## Anti-Patterns
 
-### No ViewModel / lifecycle-aware state
+### Direct manager mutation from screens
+**What happens:** Some screens access `UserProgressManager` / `SettingsManager` directly without going through a ViewModel.
+**Why it's wrong:** Bypasses the MVVM boundary, making UI testing difficult and creating implicit state coupling.
+**Do this instead:** Route all state reads/writes through a ViewModel `StateFlow`; the ViewModel accesses managers internally.
 
-**What happens:** Manager singletons hold `mutableStateOf` state as `object` properties — state is tied to process lifetime, not Activity/Fragment lifecycle
-**Why it's wrong:** State survives configuration changes (fine) but also creates untestable global singletons; manager initialization order in `MainActivity.onCreate()` is fragile
-**Do this instead:** Introduce ViewModels scoped to each screen; inject managers via Hilt; expose state as `StateFlow`; reference `data/manager/UserProgressManager.kt` as migration target
-
-### GameMode enum duplicated in two packages
-
-**What happens:** `com.example.vietforces.data.model.GameMode` (the UI-facing enum with icons/colors) and `com.example.vietforces.data.manager.GameMode` (the spaced-repetition key enum) coexist; game screens must import the correct one
-**Why it's wrong:** Name collision requires careful import management; easy to use the wrong `GameMode` type in game screens
-**Do this instead:** Consolidate into a single `GameMode` enum in `data/model/GameMode.kt`; add a `key` property matching the spaced-repetition key strings
-
-### UI screens access managers and repository directly
-
-**What happens:** Game screens (`ui/screens/game/*.kt`) call `VocabularyRepository.allVocabulary`, `UserProgressManager.recordCorrectAnswer()`, `EncounteredItemsManager` all in the same composable
-**Why it's wrong:** Composables carry business logic; hard to test; violates separation of concerns
-**Do this instead:** Move game logic into ViewModels; composables receive only UI state and emit events
+### Hardcoded vocabulary in VocabularyRepository
+**What happens:** `data/repository/VocabularyRepository.kt` is an `object` with 154 hardcoded `VocabularyItem` entries and local drawable IDs.
+**Why it's wrong:** Adding new words requires an app update; the cloud `public.words` table and Android vocabulary are separately maintained and can drift.
+**Do this instead:** Fetch vocabulary from Supabase `public.words` and cache locally (Room or DataStore), falling back to bundled assets offline.
 
 ## Error Handling
 
-**Strategy:** Defensive — AI errors are caught and surfaced as `AiCallResult.Error`; all manager `loadFromPreferences()` calls wrap in `try/catch` to handle uninitialized state
+**Android strategy:** Repositories return `Result<T>`. ViewModels map failures to `sealed class UiState.Error(message)` and expose them via `StateFlow`. Screens render error states inline or via `Toast`.
 
-**Patterns:**
-- `AiManager` wraps every AI call in `try/catch`; maps `NotConfiguredException` to `isConfigError=true` so UI can show a configuration hint rather than a generic error
-- `PreferencesManager` accessed via `getPrefs()` which throws `IllegalStateException` if not initialized; all manager callers wrap in `try/catch`
-- Game screens show `Toast` for unimplemented modes (fallback in `MainActivity.kt` `else` branch of `onGameModeClick`)
+**Web Admin:** Server Actions return typed `ActionResult` objects; error messages rendered in the page component.
 
-## Cross-Cutting Concerns
-
-**Logging:** `android.util.Log` with tag `"AiManager"` for AI warnings/errors; no structured logging framework
-**Validation:** Input validated at the AI layer (score clamped with `coerceIn`, blank reply retried once in `roleplayReply`)
-**Authentication:** None — app is offline-first; OpenAI API key embedded in `BuildConfig` at build time
+**Edge Functions:** All handlers wrap logic in `try/catch` and return structured `{ error: message }` JSON with appropriate HTTP status codes.
 
 ---
 
-*Architecture analysis: 2026-07-22*
+*Architecture analysis: 2026-07-24*
